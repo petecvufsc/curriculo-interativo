@@ -1,0 +1,181 @@
+/* Base: reset, estrutura da página, controles, diálogos. */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--fundo); color: var(--texto);
+  font-family: var(--fonte); font-size: 1rem; line-height: 1.4;
+  hyphens: none; -webkit-hyphens: none;
+}
+h1, h2, h3, p, ul, dl, dd { margin: 0; }
+ul { padding: 0; list-style: none; }
+button { font-family: inherit; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.muted { color: var(--texto-suave); }
+.oculto-visualmente { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Atalhos para teclado: a grade tem ~200 paradas de Tab antes do painel */
+.pular {
+  position: absolute; top: -100px; left: 8px; z-index: 20; padding: 10px 14px;
+  background: var(--primario-bg); color: var(--primario-tx); font-weight: 600; text-decoration: none; border-radius: 4px;
+}
+.pular + .pular { left: 230px; }
+.pular:focus { top: 8px; }
+
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Cabeçalho */
+.topo { display: flex; align-items: center; gap: 12px; background: var(--faixa-bg); color: var(--faixa-tx); padding: 10px 16px; }
+.topo-logo { flex: none; width: 40px; height: 40px; background: #ffffff; border-radius: 4px; padding: 2px; }
+.topo h1 { font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+.topo p { font-size: 0.875rem; opacity: 0.95; margin-top: 1px; }
+
+.corpo { display: flex; flex-direction: column; gap: 16px; padding: 16px; flex: 1; min-width: 0; }
+.principal { min-width: 0; }
+/* Destinos dos atalhos recebem foco por programa, não por Tab: sem contorno */
+.principal:focus, .painel:focus { outline: none; }
+
+/* Abas */
+.abas { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 2px solid var(--borda); }
+.aba {
+  cursor: pointer; min-height: 44px; padding: 6px 18px; font-size: 1rem; font-weight: 600;
+  background: transparent; color: var(--texto-suave); border: 0; border-bottom: 3px solid transparent; margin-bottom: -2px;
+}
+.aba:hover { color: var(--texto); background: var(--superficie-2); }
+.aba[aria-selected='true'] { color: var(--texto); border-bottom-color: var(--verde); }
+
+/* Botões e campos */
+.botao {
+  font-size: 0.9375rem; font-weight: 600; cursor: pointer; padding: 8px 14px; min-height: 40px;
+  background: var(--superficie); color: var(--texto); border: 1px solid var(--borda-forte); border-radius: 4px;
+}
+.botao:hover { background: var(--superficie-2); }
+.botao.primario { background: var(--primario-bg); color: var(--primario-tx); border-color: var(--primario-bg); }
+.botao.primario:hover { background: var(--primario-bg-hover); border-color: var(--primario-bg-hover); }
+.botao.pequeno { min-height: 32px; padding: 3px 10px; font-size: 0.875rem; }
+.botao:disabled { opacity: 0.55; cursor: not-allowed; }
+.botao-arquivo { display: inline-flex; align-items: center; justify-content: center; position: relative; text-align: center; }
+.botao-arquivo:focus-within { outline: 3px solid var(--foco); outline-offset: 2px; }
+.campo {
+  font: inherit; font-size: 0.9375rem; min-height: 40px; padding: 6px 8px; min-width: 0;
+  background: var(--superficie); color: var(--texto); border: 1px solid var(--borda-forte); border-radius: 4px;
+}
+.campo-numero { width: 5.5rem; }
+.link { all: unset; cursor: pointer; color: var(--foco); text-decoration: underline; text-underline-offset: 2px; border-radius: 2px; padding: 3px 0; display: inline-block; }
+@media (prefers-color-scheme: dark) { .link { color: #9ec5ff; } }
+.link:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+
+/* Caixas de seleção: alvo de 24 px ou mais */
+input[type='checkbox'] {
+  appearance: none; -webkit-appearance: none; flex: none; margin: 0; cursor: pointer;
+  width: 20px; height: 20px; display: inline-grid; place-content: center;
+  background: var(--superficie); border: 2px solid var(--borda-forte); border-radius: 3px;
+}
+input[type='checkbox']:hover { border-color: var(--verde); }
+input[type='checkbox']:checked { background: var(--primario-bg); border-color: var(--primario-bg); }
+input[type='checkbox']:checked::after {
+  content: ''; width: 10px; height: 5px; margin-top: -2px;
+  border-left: 2.5px solid var(--primario-tx); border-bottom: 2.5px solid var(--primario-tx); transform: rotate(-45deg);
+}
+input[type='checkbox']:indeterminate { border-color: var(--primario-bg); }
+input[type='checkbox']:indeterminate::after { content: ''; width: 10px; height: 3px; background: var(--primario-bg); }
+
+/* Rodapé e legenda */
+.rodape { padding: 14px 16px 22px; border-top: 1px solid var(--borda); background: var(--superficie); font-size: 0.875rem; display: flex; flex-direction: column; gap: 10px; color: var(--texto-suave); }
+.legenda { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; color: var(--texto); }
+.legenda li { font-size: 0.875rem; }
+
+/* Diálogos */
+.dialogo { width: min(660px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; background: var(--superficie); color: var(--texto); border: 1px solid var(--borda-forte); border-radius: 6px; }
+.dialogo::backdrop { background: rgb(10 20 15 / 0.55); }
+.dialogo-corpo { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.dialogo h2 { font-size: 1.25rem; font-weight: 600; padding-bottom: 8px; border-bottom: 2px solid var(--verde); }
+.texto-dialogo { display: flex; flex-direction: column; gap: 10px; font-size: 1rem; }
+.texto-dialogo h3 { font-size: 1.0625rem; font-weight: 600; margin-top: 8px; }
+
+/* Barra de ações fixa (telas estreitas) */
+.barra-acoes {
+  position: sticky; bottom: 0; z-index: 5; display: grid; grid-template-columns: auto 1fr; gap: 8px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom)); background: var(--superficie); border-top: 1px solid var(--borda-forte);
+}
+.barra-acoes .botao { min-height: 44px; }
+.barra-acoes-detalhes { display: flex; align-items: center; text-decoration: none; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#painel { scroll-margin-top: 12px; }
+
+/* Responsivo */
+@media (min-width: 700px) {
+  .topo { padding: 12px 24px; }
+  .corpo { padding: 20px 24px; }
+}
+@media (min-width: 1100px) {
+  .corpo { padding: 16px 12px; }
+}
+/* Painel ao lado da grade só em telas largas: com 10 colunas, abaixo disso os nomes não caberiam inteiros */
+@media (min-width: 1620px) {
+  .corpo { flex-direction: row; align-items: flex-start; gap: 16px; padding: 18px 20px; }
+  .principal { flex: 1; }
+  .barra-acoes { display: none; }
+}
+@media (pointer: coarse) {
+  .botao, .campo, .aba { min-height: 48px; }
+  .botao.pequeno { min-height: 44px; }
+  input[type='checkbox'] { width: 26px; height: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  .botao, .campo, .cartao, .painel, .semestre, .item-plano { border-color: CanvasText; }
+}
+
+/* Cabeçalho: Ajuda e Sobre sempre à vista (antes ficavam no fim do painel, a 1700 px do topo) */
+.topo-titulo { min-width: 0; flex: 1; }
+.topo-acoes { display: flex; gap: 8px; flex: none; }
+.botao-topo {
+  cursor: pointer; min-height: 36px; padding: 4px 14px; font-size: 0.9375rem; font-weight: 600;
+  background: transparent; color: var(--faixa-tx); border: 1px solid rgb(255 255 255 / 0.7); border-radius: 4px;
+}
+.botao-topo:hover { background: rgb(255 255 255 / 0.15); }
+.botao-topo:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+@media (max-width: 520px) {
+  .topo { flex-wrap: wrap; }
+  .topo-acoes { width: 100%; }
+}
+@media (pointer: coarse) { .botao-topo { min-height: 44px; } }
+
+/* Dica dos dois gestos do cartão e legenda, logo acima da grade */
+.dica { font-size: 0.9375rem; margin-bottom: 8px; color: var(--texto); }
+.principal > [role='tabpanel'] > .legenda { margin-bottom: 12px; padding: 8px 10px; background: var(--superficie); border: 1px solid var(--borda); border-radius: 4px; font-size: 0.875rem; }
+
+/* Aviso de ação (cascata, mudança de situação), com "Desfazer"; acompanha a rolagem da grade */
+.mensagem-acao {
+  position: sticky; top: 8px; z-index: 6; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px;
+  margin-bottom: 10px; padding: 8px 12px; font-size: 0.9375rem;
+  background: var(--sucesso-tinta); color: var(--texto); border: 1px solid var(--borda-forte); border-left: 4px solid var(--verde); border-radius: 4px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
+}
+.mensagem-acoes { display: flex; gap: 6px; }
+
+/* Botão de perigo: apaga dados do aluno */
+.botao.perigo { color: var(--tr); border-color: var(--tr); }
+.botao.perigo:hover { background: var(--erro-tinta); }
+.botao.largura-total { grid-column: 1 / -1; }
+.voltar { font-size: 0.875rem; align-self: flex-start; }
+
+/* Resumo na barra fixa: os totais ficam no painel, longe da vista em telas estreitas */
+.barra-acoes { grid-template-columns: auto auto 1fr; align-items: center; }
+.barra-resumo { font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--texto); }
+@media (max-width: 420px) { .barra-resumo { display: none; } .barra-acoes { grid-template-columns: auto 1fr; } }
+
+/* Integralização do curso: sempre à vista no topo */
+.resumo-integralizacao { background: var(--superficie); border: 1px solid var(--borda); border-radius: 4px; padding: 10px 14px 12px; margin-bottom: 14px; box-shadow: var(--sombra); }
+.resumo-linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; }
+.resumo-linha h2 { font-size: 0.9375rem; font-weight: 700; color: var(--texto-suave); }
+.resumo-percentual { font-size: 1.125rem; }
+.resumo-percentual strong { font-size: 1.75rem; font-weight: 700; color: var(--verde-escuro); font-variant-numeric: tabular-nums; }
+.resumo-horas { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.barra-geral { position: relative; height: 14px; margin: 8px 0 4px; background: var(--superficie-2); border: 1px solid var(--borda-forte); border-radius: 7px; overflow: hidden; }
+.barra-geral-hoje, .barra-geral-plano { position: absolute; left: 0; top: 0; bottom: 0; }
+.barra-geral-hoje { background: var(--primario-bg); }
+.barra-geral-plano { background: repeating-linear-gradient(135deg, var(--primario-bg) 0 4px, var(--superficie-2) 4px 8px); opacity: 0.7; }
+.resumo-plano { font-size: 1rem; }
+.resumo-plano strong { font-variant-numeric: tabular-nums; }

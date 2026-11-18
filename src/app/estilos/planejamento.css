@@ -1,0 +1,90 @@
+/* Planejamento de semestres: colunas, linhas enxutas, medidor de créditos e busca de disciplina. */
+.planejamento { display: flex; flex-direction: column; gap: 14px; background: var(--superficie); border: 1px solid var(--borda); border-radius: 4px; padding: 16px; box-shadow: var(--sombra); }
+.planejamento h2 { font-size: 1.25rem; font-weight: 700; }
+
+.como-funciona { border: 1px solid var(--borda); border-radius: 4px; background: var(--superficie-2); font-size: 0.9375rem; }
+.como-funciona summary { cursor: pointer; font-weight: 700; padding: 10px 12px; min-height: 40px; }
+.como-funciona-corpo { padding: 0 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.como-funciona ol { padding-left: 20px; list-style: decimal; display: flex; flex-direction: column; gap: 4px; }
+.nota-sugestao { font-size: 0.9375rem; padding: 6px 10px; border-left: 4px solid var(--alerta-borda); background: var(--alerta-tinta); color: var(--texto); border-radius: 0 3px 3px 0; }
+
+/* Controles: opções à esquerda, ações logo abaixo */
+.plano-controles { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-start; }
+.plano-botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.quantidade { display: flex; flex-direction: column; gap: 3px; font-size: 0.9375rem; max-width: 22rem; }
+.quantidade-ajuda { font-size: 0.8125rem; }
+.erro-texto { font-size: 0.8125rem; color: var(--tr); font-weight: 600; }
+
+/* Situação do plano: uma linha curta por item */
+.resumo-plano-lista { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 8px 12px; background: var(--superficie-2); border: 1px solid var(--borda); border-radius: 4px; font-size: 0.9375rem; }
+.resumo-plano-lista li { display: inline-flex; align-items: center; gap: 6px; }
+.resumo-plano-lista li::before { content: '•'; content: '•' / ''; color: var(--texto-suave); }
+.resumo-plano-lista li.ok::before { content: '✓'; content: '✓' / ''; color: var(--verde-escuro); font-weight: 700; }
+.resumo-plano-lista li.falta::before { content: '○'; content: '○' / ''; }
+.resumo-plano-lista li.erro { color: var(--tr); font-weight: 600; }
+.resumo-plano-lista li.erro::before { content: '▲'; content: '▲' / ''; color: var(--tr); }
+
+/* Semestres lado a lado, como colunas de um quadro; quebram de linha quando faltar espaço */
+.semestres { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 300px)); gap: 14px; align-items: start; padding: 0; list-style: none; }
+.semestre { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 10px; background: var(--fundo); border: 1px solid var(--borda); border-top: 3px solid var(--verde); border-radius: 4px; }
+/* Título e botões em duas linhas, iguais em todas as colunas (antes quebravam de forma diferente) */
+.semestre-topo { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.semestre h3 { font-size: 1.125rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.semestre-acoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.semestre-total { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.semestre-vazio { font-size: 0.9375rem; }
+
+/* Medidor de créditos (marcas em 16 e 30) */
+.medidor { display: flex; flex-direction: column; gap: 3px; }
+.medidor-trilho { position: relative; height: 12px; background: var(--superficie); border: 1px solid var(--borda-forte); border-radius: 6px; overflow: hidden; }
+.medidor-faixa { position: absolute; top: 0; bottom: 0; background: var(--sucesso-tinta); }
+.medidor-nivel { position: absolute; left: 0; top: 0; bottom: 0; background: var(--texto-suave); }
+.medidor-ok .medidor-nivel { background: var(--primario-bg); }
+.medidor-abaixo .medidor-nivel { background: var(--alerta-borda); }
+.medidor-acima .medidor-nivel { background: var(--tr); }
+.medidor-marca { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--texto); opacity: 0.55; }
+.medidor-escala { position: relative; height: 1.1em; font-size: 0.75rem; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.medidor-escala span { position: absolute; transform: translateX(-50%); }
+.medidor-escala span:first-child { left: 0; transform: none; }
+.medidor-aviso { font-size: 0.875rem; margin-top: 2px; padding-left: 20px; position: relative; }
+.medidor-aviso::before { position: absolute; left: 2px; font-weight: 700; }
+.medidor-aviso-abaixo-minimo::before { content: '▼'; content: '▼' / ''; color: var(--alerta-borda); }
+.medidor-aviso-acima-maximo::before { content: '▲'; content: '▲' / ''; color: var(--tr); }
+.medidor-aviso-ok { color: var(--verde-escuro); }
+.medidor-aviso-ok::before { content: '✓'; content: '✓' / ''; }
+
+/* Disciplinas do semestre: linhas enxutas, com × pequeno */
+.itens-plano { display: flex; flex-direction: column; gap: 4px; }
+.item-plano { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 5px 6px 5px 11px; background: var(--superficie); border: 1px solid var(--borda); border-radius: 3px; font-size: 0.9375rem; }
+.item-plano::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primario-bg); }
+.item-plano.com-problema::before { background: var(--tr); }
+.item-plano-linha { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.item-plano-textos { display: flex; flex-direction: column; min-width: 0; }
+.item-plano-nome { font-weight: 600; line-height: 1.25; overflow-wrap: break-word; }
+.item-plano-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 0.8125rem; }
+.botao-x { flex: none; width: 28px; height: 28px; display: grid; place-items: center; cursor: pointer; font-size: 1.25rem; line-height: 1; color: var(--texto-suave); background: transparent; border: 1px solid transparent; border-radius: 4px; }
+.botao-x:hover { color: var(--tr); border-color: var(--tr); background: var(--erro-tinta); }
+@media (pointer: coarse) { .botao-x { width: 44px; height: 44px; } }
+.problema { display: flex; flex-direction: column; padding: 4px 8px; background: var(--erro-tinta); border-left: 3px solid var(--tr); font-size: 0.875rem; border-radius: 0 3px 3px 0; }
+.impacto { font-size: 0.8125rem; font-weight: 600; color: var(--verde-escuro); background: var(--sucesso-tinta); padding: 0 6px; border-radius: 3px; white-space: nowrap; }
+
+/* Busca de disciplina */
+.adicionar { border-top: 1px dashed var(--borda-forte); padding-top: 6px; font-size: 0.9375rem; }
+.adicionar summary { cursor: pointer; font-weight: 700; color: var(--verde-escuro); padding: 6px 0; min-height: 36px; }
+.adicionar-corpo { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; }
+.adicionar-lista { display: flex; flex-direction: column; gap: 4px; }
+.adicionar-opcao {
+  width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; cursor: pointer;
+  padding: 6px 8px; min-height: 44px; font-size: 0.9375rem; color: var(--texto);
+  background: var(--superficie); border: 1px solid var(--borda-forte); border-radius: 4px;
+}
+.adicionar-opcao:hover { background: var(--superficie-2); border-color: var(--verde); }
+.adicionar-nome { font-weight: 600; line-height: 1.25; }
+.adicionar-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 0.8125rem; color: var(--texto-suave); }
+.adicionar-tag { font-size: 0.75rem; font-weight: 600; border: 1px solid var(--borda-forte); border-radius: 3px; padding: 0 5px; color: var(--texto-suave); }
+.adicionar-mais { font-size: 0.8125rem; }
+
+/* Toque: títulos expansíveis com 44 px */
+@media (pointer: coarse) {
+  .adicionar summary, .como-funciona summary { min-height: 44px; display: flex; align-items: center; }
+}

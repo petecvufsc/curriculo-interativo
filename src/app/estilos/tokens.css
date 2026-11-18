@@ -1,0 +1,83 @@
+/*
+ * Tokens visuais. Linha sóbria, na tradição da versão original do PET: fundo cinza-claro, faixas verdes
+ * (#0E7B5F) nos títulos, texto escuro. Significado nunca depende só da cor: cada destaque também tem
+ * selo de texto com símbolo. Contraste (WCAG AA) conferido por script no navegador.
+ */
+:root {
+  color-scheme: light dark;
+
+  --fonte: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+
+  --fundo: #f1f3f2;
+  --superficie: #ffffff;
+  --superficie-2: #e9eeeb;
+  --texto: #1a211e;
+  --texto-suave: #4c5852;
+  --borda: #d3d9d6;
+  --borda-forte: #77837d;
+  --foco: #0b3d91;
+
+  --verde: #0e7b5f;
+  --verde-escuro: #0a5c46;
+  --faixa-bg: #0e7b5f;
+  --faixa-tx: #ffffff;
+  --primario-bg: #0e7b5f;
+  --primario-bg-hover: #0a5c46;
+  --primario-tx: #ffffff;
+  --cursada-bg: #e6f2ec;
+  --cursada-barra: #0e7b5f;
+
+  /* Destaques de relação: cor forte (barra e selo), tinta de fundo e texto do selo */
+  --sel: #1b4f9c;        --sel-tinta: #dce7f7;        --sel-tx: #ffffff;
+  --pre: #14663a;        --pre-tinta: #d6ecdd;        --pre-tx: #ffffff;
+  --pre2: #2e7d4f;       --pre2-tinta: #ebf5ee;       --pre2-tx: #ffffff;
+  --tr: #b3261e;         --tr-tinta: #f7dcd8;         --tr-tx: #ffffff;
+  --tr2: #a8520a;        --tr2-tinta: #f9e9d6;        --tr2-tx: #ffffff;
+  --disp: #0a5c46;       --disp-tinta: #cdeadd;       --disp-tx: #ffffff;
+  --cursando: #6a3fa0;   --cursando-tx: #ffffff;
+  --reprovada: #8f1d1d;  --reprovada-tx: #ffffff;
+  --planejada: #0f5d73;  --planejada-tx: #ffffff;
+
+  --alerta-tinta: #fbf0c8; --alerta-borda: #8a6500;
+  --erro-tinta: #f9dedb;
+  --sucesso-tinta: #d9eee2;
+  --sombra: 0 1px 2px rgb(20 30 25 / 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #131917;
+    --superficie: #1b2320;
+    --superficie-2: #232d29;
+    --texto: #e8eeea;
+    --texto-suave: #aab7b0;
+    --borda: #33403b;
+    --borda-forte: #8a9a92;
+    --foco: #ffd54a;
+
+    --verde: #46d6a4;
+    --verde-escuro: #6fe3b9;
+    --faixa-bg: #0e6a52;
+    --faixa-tx: #ffffff;
+    --primario-bg: #46d6a4;
+    --primario-bg-hover: #6fe3b9;
+    --primario-tx: #062018;
+    --cursada-bg: #163a2f;
+    --cursada-barra: #46d6a4;
+
+    --sel: #ffd54a;        --sel-tinta: #3d3711;        --sel-tx: #1a1500;
+    --pre: #5ce0a0;        --pre-tinta: #11432f;        --pre-tx: #06241a;
+    --pre2: #3fae7c;       --pre2-tinta: #163325;       --pre2-tx: #06241a;
+    --tr: #ff8e80;         --tr-tinta: #4b1e2a;         --tr-tx: #2a0a06;
+    --tr2: #ffb45c;        --tr2-tinta: #4a3416;        --tr2-tx: #2a1600;
+    --disp: #46d6a4;       --disp-tinta: #134536;       --disp-tx: #062018;
+    --cursando: #b9a2ff;   --cursando-tx: #1b0b3a;
+    --reprovada: #ffa3a3;  --reprovada-tx: #3a0808;
+    --planejada: #6fd0f0;  --planejada-tx: #052230;
+
+    --alerta-tinta: #4a3d10; --alerta-borda: #f2c94c;
+    --erro-tinta: #4b1e2a;
+    --sucesso-tinta: #163a2f;
+    --sombra: none;
+  }
+}

@@ -1,0 +1,6 @@
+/* Folhas de estilo do app. A ordem importa: tokens → base → componentes. */
+@import './tokens.css';
+@import './base.css';
+@import './grade.css';
+@import './painel.css';
+@import './planejamento.css';

@@ -1,0 +1,91 @@
+/* Grade de fases: faixa verde por fase (como no programa original), listas simples e selos de texto. */
+.fases { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.fase { background: var(--superficie); border: 1px solid var(--borda); border-radius: 4px; overflow: hidden; min-width: 0; box-shadow: var(--sombra); }
+
+.fase-cabecalho { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--faixa-bg); color: var(--faixa-tx); }
+.fase-cabecalho h2 { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+.fase-todas { display: grid; place-items: center; min-width: 28px; min-height: 28px; cursor: pointer; }
+/* Caixa da fase sobre a faixa verde: contorno e preenchimento claros */
+.fase-cabecalho input[type='checkbox'] { background: rgb(255 255 255 / 0.15); border-color: #ffffff; }
+.fase-cabecalho input[type='checkbox']:hover { border-color: #ffffff; background: rgb(255 255 255 / 0.3); }
+.fase-cabecalho input[type='checkbox']:checked { background: #ffffff; border-color: #ffffff; }
+.fase-cabecalho input[type='checkbox']:checked::after { border-color: var(--faixa-bg); }
+.fase-cabecalho input[type='checkbox']:indeterminate { background: rgb(255 255 255 / 0.15); border-color: #ffffff; }
+.fase-cabecalho input[type='checkbox']:indeterminate::after { background: #ffffff; }
+
+.lista-cartoes { display: flex; flex-direction: column; }
+
+/* Disciplina: nome (que seleciona) e, abaixo, a caixa "cursada" com o código */
+.cartao {
+  position: relative; container-type: inline-size;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+  padding: 5px 8px 5px 11px; min-width: 0;
+  background: var(--cartao-bg, transparent); border-bottom: 1px solid var(--borda);
+}
+.cartao:last-child { border-bottom: 0; }
+.cartao::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--barra, transparent); }
+.cartao-nome {
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: 28px; padding: 3px 2px;
+  /* O tamanho acompanha a largura do cartão: nenhum nome quebra no meio da palavra nem usa hífen.
+     Medido: a palavra mais longa ("Geoprocessamento") ocupa 8,29 vezes o tamanho da fonte (Source Sans 3,
+     peso 600). O divisor 8,7 dá ~5 % de folga. `cqw` já exclui o recuo do cartão; 4 px = recuo do botão. */
+  font-size: clamp(11.5px, calc((100cqw - 4px) / 8.7), 14.5px);
+  font-weight: 600; line-height: 1.22; color: var(--texto);
+  overflow-wrap: normal; word-break: normal; hyphens: none; -webkit-hyphens: none; border-radius: 2px;
+}
+.cartao-nome:hover { text-decoration: underline; text-underline-offset: 3px; }
+.cartao-nome:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
+.cartao-nome[aria-pressed='true'] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.cartao-linha { display: flex; align-items: center; gap: 7px; min-height: 28px; min-width: 0; cursor: pointer; }
+.cartao-codigo { font-size: 0.75rem; color: var(--subtexto, var(--texto-suave)); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+/* As horas-aula ficam nos detalhes e nos totais; aqui só para leitores de tela */
+.cartao-horas { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tag-complementar { font-size: 0.75rem; border: 1px solid var(--borda-forte); border-radius: 3px; padding: 0 5px; color: var(--texto-suave); }
+
+/* Estados (a ordem importa: destaques vencem "cursada") */
+.cartao.cursada { --cartao-bg: var(--cursada-bg); --barra: var(--cursada-barra); }
+.cartao.selecionada { --cartao-bg: var(--sel-tinta); --barra: var(--sel); }
+.cartao.pre-direto { --cartao-bg: var(--pre-tinta); --barra: var(--pre); }
+.cartao.pre-indireto { --cartao-bg: var(--pre2-tinta); --barra: var(--pre2); }
+.cartao.tranca-direto { --cartao-bg: var(--tr-tinta); --barra: var(--tr); }
+.cartao.tranca-indireto { --cartao-bg: var(--tr2-tinta); --barra: var(--tr2); }
+.cartao.disponivel { --cartao-bg: var(--disp-tinta); --barra: var(--disp); }
+.cartao.alternativa { outline: 1px dashed var(--texto-suave); outline-offset: -3px; }
+
+/* Selos de texto: o nome do destaque vem escrito, então o significado não depende só da cor */
+.selos { display: flex; flex-wrap: wrap; gap: 4px; margin: 1px 0 2px; }
+.selo {
+  display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 3px;
+  font-size: 0.75rem; font-weight: 600; line-height: 1.35;
+  background: var(--c, var(--texto-suave)); color: var(--c-tx, #ffffff);
+}
+.selo-selecionada { --c: var(--sel); --c-tx: var(--sel-tx); }
+.selo-pre-direto { --c: var(--pre); --c-tx: var(--pre-tx); }
+.selo-pre-indireto { --c: var(--pre2); --c-tx: var(--pre2-tx); }
+.selo-tranca-direto { --c: var(--tr); --c-tx: var(--tr-tx); }
+.selo-tranca-indireto { --c: var(--tr2); --c-tx: var(--tr2-tx); }
+.selo-disponivel { --c: var(--disp); --c-tx: var(--disp-tx); }
+.selo-cursada { --c: var(--cursada-barra); --c-tx: var(--primario-tx); }
+.selo-cursando { --c: var(--cursando); --c-tx: var(--cursando-tx); }
+.selo-reprovada { --c: var(--reprovada); --c-tx: var(--reprovada-tx); }
+.selo-planejada { --c: var(--planejada); --c-tx: var(--planejada-tx); }
+.selo-alt { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0 6px; border: 1px dashed var(--texto-suave); border-radius: 3px; color: var(--texto); background: var(--superficie); }
+
+/* Optativas */
+.optativas { margin-top: 16px; background: var(--superficie); border: 1px solid var(--borda); border-radius: 4px; overflow: hidden; box-shadow: var(--sombra); }
+.optativas h2 { font-size: 1rem; font-weight: 700; padding: 8px 12px; background: var(--faixa-bg); color: var(--faixa-tx); }
+.optativas-grade .lista-cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+.optativas-grade .cartao { border-bottom: 1px solid var(--borda); }
+.optativas-grade .cartao-nome { font-size: 0.9375rem; }
+
+@media (min-width: 700px) {
+  .fases { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+}
+/* Coluna mínima de 125 px: 23 (recuos) + 11,5 (fonte mínima) × 8,7 (palavra mais longa) + 2 (borda) = 125 */
+@media (min-width: 1100px) {
+  .fases { grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 6px; }
+}
+@media (pointer: coarse) {
+  .cartao-nome, .cartao-linha { min-height: 44px; }
+  .fase-todas { min-width: 44px; min-height: 44px; }
+}
