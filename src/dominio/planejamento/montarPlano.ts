@@ -1,5 +1,6 @@
 // Montagem automática do plano até o fim do curso (docs/regras-de-negocio.md §11).
 import { baseSimulacao, type RegistroAluno } from '../aluno';
+import { SEMESTRES_MAX_PLANO } from '../aluno/tipos';
 import { motorEm, type MotorDoPlano } from './motorPorSemestre';
 import { sugerirSemestre } from './sugerirSemestre';
 
@@ -13,7 +14,7 @@ export interface ResultadoMontagem {
 }
 
 /** Limite de semestres do plano: a duração máxima do curso no PDF (15 semestres). */
-export const LIMITE_SEMESTRES_PADRAO = 15;
+export const LIMITE_SEMESTRES_PADRAO = SEMESTRES_MAX_PLANO;
 
 /**
  * Monta, a partir do histórico, os semestres seguintes até cobrir todas as **obrigatórias** (§11,

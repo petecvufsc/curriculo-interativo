@@ -50,7 +50,7 @@
   .mover-para { position: absolute; right: 8px; bottom: 6px; width: 7.5rem; opacity: 0; }
   .item-plano:hover .mover-para, .item-plano:focus-within .mover-para, .mover-para:focus { opacity: 1; }
 }
-@media (hover: none), (pointer: coarse) { .mover-para { margin-top: 6px; min-height: 44px; } }
+@media (hover: none), (pointer: coarse) { .mover-para { flex: none; width: 5.75rem; min-height: 44px; font-size: 0.8125rem; align-self: center; } }
 .semestre-vazio { font-size: 0.9375rem; }
 
 /* Medidor de créditos (marcas em 16 e 30) */

@@ -3,6 +3,10 @@ import type { Curriculo } from '../tipos';
 import { VERSAO_REGRAS_PADRAO, versaoRegrasValida, type VersaoRegras } from '../curriculos/versoes';
 import { semestreValido } from '../planejamento/rotuloSemestre';
 import {
+  CODIGOS_EXTERNOS_MAX,
+  CODIGOS_MAX_POR_SEMESTRE,
+  FORMATO_CODIGO_EXTERNO,
+  SEMESTRES_MAX_PLANO,
   DISCIPLINAS_POR_SEMESTRE_MAX,
   DISCIPLINAS_POR_SEMESTRE_MIN,
   DISCIPLINAS_POR_SEMESTRE_PADRAO,
@@ -32,22 +36,53 @@ function lerStatus(bruto: unknown, codigos: Set<string>, rel: string[]): Record<
   else if (!ehObjeto(bruto)) rel.push('Campo "status" inválido (esperado um objeto): nenhum status importado.');
   if (!ehObjeto(bruto)) return {};
   const aceitos = new Map<string, StatusDisciplina>();
+  const avisar = limitarRelato(rel);
+  let externos = 0;
   for (const [codigo, valor] of Object.entries(bruto)) {
     if (!ehStatus(valor)) {
-      rel.push(`Status inválido para ${codigo}: ${texto(valor)}. Entrada ignorada.`);
+      avisar(`Status inválido para ${texto(codigo)}: ${texto(valor)}. Entrada ignorada.`);
       continue;
     }
     if (!codigos.has(codigo)) {
-      if (valor !== 'aprovada') {
-        // AMBIGUIDADE: §12 aceita código desconhecido, mas §10 só permite "aprovada" para outro currículo.
-        rel.push(`${codigo} não pertence ao currículo e só pode ser "aprovada" (recebido "${valor}"). Entrada ignorada.`);
+      if (!FORMATO_CODIGO_EXTERNO.test(codigo)) {
+        avisar(`${texto(codigo)} não pertence ao currículo e não tem o formato de código de disciplina (AAA9999). Entrada ignorada.`);
         continue;
       }
-      rel.push(`${codigo} não pertence ao currículo: aceito como disciplina aprovada de outro currículo.`);
+      if (valor !== 'aprovada') {
+        // AMBIGUIDADE: §12 aceita código desconhecido, mas §10 só permite "aprovada" para outro currículo.
+        avisar(`${codigo} não pertence ao currículo e só pode ser "aprovada" (recebido "${valor}"). Entrada ignorada.`);
+        continue;
+      }
+      if (externos >= CODIGOS_EXTERNOS_MAX) {
+        avisar(`${codigo}: limite de ${CODIGOS_EXTERNOS_MAX} disciplinas de outro currículo atingido. Entrada ignorada.`);
+        continue;
+      }
+      externos++;
+      avisar(`${codigo} não pertence ao currículo: aceito como disciplina aprovada de outro currículo.`);
     }
     aceitos.set(codigo, valor);
   }
+  avisar.fechar();
   return Object.fromEntries(aceitos);
+}
+
+/**
+ * Relato com teto: as primeiras linhas aparecem inteiras e o resto vira "e mais N" (um arquivo hostil não pode gerar
+ * milhares de linhas). `fechar()` acrescenta o resumo, se houve corte.
+ */
+function limitarRelato(rel: string[], maximo = 20) {
+  let escritas = 0;
+  let cortadas = 0;
+  const avisar = (linha: string) => {
+    if (escritas < maximo) {
+      rel.push(linha);
+      escritas++;
+    } else cortadas++;
+  };
+  avisar.fechar = () => {
+    if (cortadas > 0) rel.push(`... e mais ${cortadas} ${cortadas === 1 ? 'aviso igual' : 'avisos iguais'} (omitidos).`);
+  };
+  return avisar;
 }
 
 /** Plano (§12): código fora do currículo é removido do plano e listado. */
@@ -57,19 +92,26 @@ function lerPlano(bruto: unknown, codigos: Set<string>, rel: string[]): Semestre
     rel.push('Campo "plano.semestres" ausente ou inválido: plano vazio.');
     return [];
   }
-  return semestres.map((s, i) => {
+  const avisar = limitarRelato(rel);
+  if (semestres.length > SEMESTRES_MAX_PLANO)
+    rel.push(`O plano tinha ${semestres.length} semestres; só os ${SEMESTRES_MAX_PLANO} primeiros foram mantidos (duração máxima do curso).`);
+  const lidos = semestres.slice(0, SEMESTRES_MAX_PLANO).map((s, i) => {
     const lista = ehObjeto(s) ? s.codigos : undefined;
     if (!Array.isArray(lista)) {
-      rel.push(`Semestre ${i + 1} do plano malformado: tratado como vazio.`);
+      avisar(`Semestre ${i + 1} do plano malformado: tratado como vazio.`);
       return { codigos: [] };
     }
     const validos: string[] = [];
     for (const c of lista) {
-      if (typeof c === 'string' && codigos.has(c)) validos.push(c);
-      else rel.push(`Semestre ${i + 1}: ${texto(c)} não pertence ao currículo e foi removido do plano.`);
+      if (typeof c === 'string' && codigos.has(c)) {
+        if (validos.length < CODIGOS_MAX_POR_SEMESTRE) validos.push(c);
+        else avisar(`Semestre ${i + 1}: mais de ${CODIGOS_MAX_POR_SEMESTRE} disciplinas; ${c} foi removida do plano.`);
+      } else avisar(`Semestre ${i + 1}: ${texto(c)} não pertence ao currículo e foi removido do plano.`);
     }
     return { codigos: validos };
   });
+  avisar.fechar();
+  return lidos;
 }
 
 /** Opções: valor ausente ou inválido volta ao padrão, com aviso no relatório. */

@@ -23,8 +23,8 @@ describe('seletor de versão das regras', () => {
   it('começa na versão 2020.1 e avisa que a versão 2028.1 será a única a partir de novembro de 2027', () => {
     render(<App />);
     expect(seletor().value).toBe('2020.1');
-    expect(screen.getByRole('option', { name: /Currículo 2020\.1/ })).toBeTruthy();
-    expect(screen.getByRole('option', { name: /Currículo 2028\.1/ })).toBeTruthy();
+    expect(screen.getByRole('option', { name: '2020.1 — atuais (até 2027.2)' })).toBeTruthy();
+    expect(screen.getByRole('option', { name: '2028.1 — novos (a partir de 2028.1)' })).toBeTruthy();
     expect(screen.getByText(/A partir de novembro de 2027, apenas a versão 2028\.1 estará disponível/)).toBeTruthy();
   });
 
@@ -97,7 +97,7 @@ describe('seletor de versão das regras', () => {
     try {
       const u = userEvent.setup();
       render(<App />);
-      expect(within(seletor()).queryByRole('option', { name: /Currículo 2020\.1/ })).toBeNull();
+      expect(within(seletor()).queryByRole('option', { name: /^2020\.1/ })).toBeNull();
       expect(seletor().value).toBe('2028.1');
       expect(screen.getByText(/A versão 2020\.1 foi encerrada em novembro de 2027/)).toBeTruthy();
       expect(marcar('Física I').checked).toBe(true); // o histórico continua

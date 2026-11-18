@@ -11,8 +11,18 @@ export function ArquivoRegistro({ e }: { e: EstadoAluno }) {
     const arquivo = entrada.files?.[0];
     if (!arquivo) return;
     const { registro, aviso: resultado } = await lerArquivoImportado(arquivo);
-    dispatch({ tipo: 'importar', registro, aviso: resultado });
     entrada.value = ''; // permite escolher o mesmo arquivo de novo
+    // Importar troca TUDO (histórico, plano e opções): pede confirmação quando já há dados no navegador
+    const marcadas = Object.keys(e.registro.status).length;
+    const semestres = e.registro.plano.semestres.length;
+    if (registro && (marcadas > 0 || semestres > 0)) {
+      const itens = [marcadas > 0 ? `${marcadas} disciplinas marcadas` : '', semestres > 0 ? `${semestres} semestres no plano` : ''].filter(Boolean).join(' e ');
+      if (!window.confirm(`Importar vai SUBSTITUIR os dados deste navegador (${itens}) pelos do arquivo. Quer continuar? Dica: use "Exportar (.json)" antes para guardar os atuais.`)) {
+        dispatch({ tipo: 'importar', registro: null, aviso: { tipo: 'sucesso', titulo: 'Importação cancelada.', linhas: ['Seus dados atuais foram mantidos.'] } });
+        return;
+      }
+    }
+    dispatch({ tipo: 'importar', registro, aviso: resultado });
   };
 
   return (

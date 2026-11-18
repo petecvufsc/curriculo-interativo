@@ -132,9 +132,43 @@ describe('importar: aceitação e relatório (§12)', () => {
     expect(r.relatorio).toHaveLength(2);
   });
 
-  it('código "__proto__" no status não corrompe o objeto', () => {
+  it('código "__proto__" no status é rejeitado (formato) e não corrompe o objeto', () => {
     const r = aceito('{"formato":"curriculo-interativo-ecv","versao":1,"curriculoId":"teste","atualizadoEm":"x","status":{"__proto__":"aprovada"},"plano":{"semestres":[]},"opcoes":{"cursandoComoAprovada":true,"limiteAulas":30}}');
-    expect(Object.keys(r.registro.status)).toEqual(['__proto__']);
+    expect(Object.keys(r.registro.status)).toEqual([]);
+    expect(Object.getPrototypeOf(r.registro.status)).toBe(Object.prototype);
+    expect(r.relatorio.join('\n')).toMatch(/formato de código de disciplina \(AAA9999\)/);
+  });
+});
+
+describe('limites de importação (achados B-01 e B-05 do caçador de bugs)', () => {
+  const arquivo = (status: object, semestres: unknown[]) =>
+    JSON.stringify({ formato: 'curriculo-interativo-ecv', versao: 1, curriculoId: 'teste', atualizadoEm: 'x', status, plano: { semestres }, opcoes: { cursandoComoAprovada: true, limiteAulas: 30 } });
+
+  it('o plano é cortado em 15 semestres (duração máxima do curso), com aviso', () => {
+    const r = aceito(arquivo({}, Array.from({ length: 1500 }, () => ({ codigos: ['TST0001'] }))));
+    expect(r.registro.plano.semestres).toHaveLength(15);
+    expect(r.relatorio.join('\n')).toMatch(/O plano tinha 1500 semestres; só os 15 primeiros/);
+  });
+
+  it('cada semestre aceita no máximo 40 disciplinas', () => {
+    const muitas = Array.from({ length: 100 }, () => 'TST0001');
+    const r = aceito(arquivo({}, [{ codigos: muitas }]));
+    expect(r.registro.plano.semestres[0].codigos).toHaveLength(40);
+  });
+
+  it('chaves que não têm o formato AAA9999 e não são do currículo são ignoradas', () => {
+    const r = aceito(arquivo({ X0: 'aprovada', 'abc 1': 'aprovada', '<img src=x onerror=1>': 'aprovada', MTM3101: 'aprovada' }, []));
+    expect(Object.keys(r.registro.status)).toEqual(['MTM3101']);
+  });
+
+  it('no máximo 500 disciplinas de outro currículo; o relatório não cresce sem limite', () => {
+    const status: Record<string, string> = {};
+    for (let i = 0; i < 3000; i++) status[`AAA${String(i).padStart(4, '0')}`] = 'aprovada';
+    for (let i = 0; i < 3000; i++) status[`lixo${i}`] = 'aprovada';
+    const r = aceito(arquivo(status, []));
+    expect(Object.keys(r.registro.status)).toHaveLength(500);
+    expect(r.relatorio.length).toBeLessThan(30);
+    expect(r.relatorio.join('\n')).toMatch(/e mais \d+ avisos iguais/);
   });
 });
 

@@ -23,6 +23,20 @@ self.addEventListener('activate', (evento) => {
   );
 });
 
+// A página, depois que o worker assumiu, manda a lista do que já carregou (JS, CSS, fontes): guarda tudo para o
+// uso offline já na primeira visita. Só aceita endereços do próprio site, dentro do escopo, e no máximo 100.
+self.addEventListener('message', (evento) => {
+  const dados = evento.data;
+  if (!dados || dados.tipo !== 'guardar' || !Array.isArray(dados.urls)) return;
+  const urls = dados.urls
+    .filter((u) => typeof u === 'string')
+    .map((u) => new URL(u, escopo))
+    .filter((u) => u.origin === escopo.origin && u.pathname.startsWith(escopo.pathname))
+    .map((u) => u.href)
+    .slice(0, 100);
+  evento.waitUntil(caches.open(CACHE).then((c) => c.addAll(urls)).catch(() => {}));
+});
+
 async function guardar(requisicao, resposta) {
   if (resposta && resposta.ok) {
     const c = await caches.open(CACHE);

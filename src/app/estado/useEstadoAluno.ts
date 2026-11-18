@@ -37,6 +37,8 @@ type Acao =
   | { tipo: 'plano'; op: OperacaoPlano }
   | { tipo: 'aba'; aba: Aba }
   | { tipo: 'importar'; registro: RegistroAluno | null; aviso: Aviso }
+  /** Outra aba do mesmo navegador gravou dados mais novos: adota-os (com "Desfazer" para manter os desta aba). */
+  | { tipo: 'externo'; registro: RegistroAluno }
   | { tipo: 'fecharAviso' }
   | { tipo: 'desfazer' }
   | { tipo: 'fecharMensagem' };
@@ -109,6 +111,8 @@ function reducerBase(e: Estado, a: Acao): Estado {
       return { ...e, aba: a.aba };
     case 'importar':
       return { ...e, registro: a.registro ?? r, aviso: a.aviso };
+    case 'externo':
+      return com(e, a.registro, 'Os dados foram atualizados em outra aba deste navegador.');
     case 'fecharAviso':
       return { ...e, aviso: null };
     case 'desfazer':
@@ -121,7 +125,7 @@ function reducerBase(e: Estado, a: Acao): Estado {
 export function useEstadoAluno() {
   const [estado, dispatch] = useReducer(reducer, undefined, inicial);
   const { registro } = estado;
-  usePersistencia(registro);
+  const { naoSalvou } = usePersistencia(registro, (novo) => dispatch({ tipo: 'externo', registro: novo }));
   const aprovadas = useMemo(() => aprovadasDe(registro), [registro]);
   // Base da simulação (respeita a opção "em andamento como aprovadas").
   const base = useMemo(() => baseSimulacao(registro), [registro]);
@@ -139,7 +143,7 @@ export function useEstadoAluno() {
   );
   const simulacao = useMemo(() => motor.simular(base), [motor, base]);
   const progresso = useMemo(() => motor.progresso(base), [motor, base]);
-  return { ...estado, versao, motor, inicioPlano, motorDoSemestre, aprovadas, base, planejadas, destaques, simulacao, progresso, dispatch };
+  return { ...estado, naoSalvou, versao, motor, inicioPlano, motorDoSemestre, aprovadas, base, planejadas, destaques, simulacao, progresso, dispatch };
 }
 
 export type EstadoAluno = ReturnType<typeof useEstadoAluno>;

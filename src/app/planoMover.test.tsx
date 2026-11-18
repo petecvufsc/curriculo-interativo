@@ -175,7 +175,8 @@ describe('Montar pela grade oficial', () => {
     render(<App />);
     await abrirPlanejamento(u);
     await u.click(screen.getByRole('button', { name: 'Montar pela grade oficial' }));
-    // plano vazio: a nota só aparece com semestres; o botão não quebra e o plano fica vazio
-    expect(screen.queryAllByRole('listitem', { name: /^\d{4}\.[12]/ })).toHaveLength(0);
+    // (achado B-06) explica e MANTÉM o plano do aluno, em vez de apagá-lo em silêncio
+    expect(screen.getByText(/Você já cumpriu todas as obrigatórias: não há o que planejar pela grade oficial\. Seu plano foi mantido\./)).toBeTruthy();
+    expect(screen.queryAllByRole('listitem', { name: /^\d{4}\.[12]/ })).toHaveLength(1);
   });
 });

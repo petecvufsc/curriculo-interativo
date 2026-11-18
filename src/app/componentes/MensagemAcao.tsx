@@ -10,7 +10,12 @@ export function MensagemAcao({ e }: { e: EstadoAluno }) {
     <div className="mensagem-acao" role="status">
       <span>{e.mensagem.texto}</span>
       <span className="mensagem-acoes">
-        <button type="button" className="botao pequeno" onClick={() => e.dispatch({ tipo: 'desfazer' })}>
+        <button type="button" className="botao pequeno" onClick={() => {
+            e.dispatch({ tipo: 'desfazer' });
+            // O botão some ao desfazer: leva o foco para a área principal, em vez de deixá-lo cair no <body> (teclado/leitor de tela)
+            document.getElementById('conteudo')?.focus();
+          }}
+        >
           Desfazer
         </button>
         <button type="button" className="botao pequeno" onClick={() => e.dispatch({ tipo: 'fecharMensagem' })} aria-label="Dispensar aviso">

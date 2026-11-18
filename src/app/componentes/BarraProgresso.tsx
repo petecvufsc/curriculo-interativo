@@ -14,6 +14,7 @@ export function BarraProgresso({ id, rotulo, p }: Props) {
     <div className="progresso-item">
       <div id={`${id}-${rotulo}`}>
         {rotulo}: {p.cumpridasHA}/{p.totalHA ?? '—'} h-a
+        {p.totalHA !== null && p.cumpridasHA > p.totalHA && <span className="muted"> (o excedente não conta)</span>}
       </div>
       <div
         className="barra"

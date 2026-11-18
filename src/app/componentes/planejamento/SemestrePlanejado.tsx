@@ -1,4 +1,4 @@
-import { useMemo, useState, type DragEvent } from 'react';
+import { useMemo, useRef, useState, type DragEvent } from 'react';
 import {
   baseDoSemestre,
   disponiveisNoSemestre,
@@ -70,6 +70,8 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
 
   // Arrastar uma disciplina de outro semestre e soltar aqui (equivale a "Mover para…", que também serve a teclado e toque)
   const [alvo, setAlvo] = useState(false);
+  // Ao remover ou mover uma disciplina o botão some: o foco vai para o título do semestre (não cai no <body>)
+  const tituloRef = useRef<HTMLHeadingElement>(null);
   const traz = (ev: DragEvent<HTMLElement>) => ev.dataTransfer.types.includes(TIPO_ARRASTO);
   const nomesDosSemestres = Array.from({ length: totalSemestres }, (_, i) => rotuloSemestre(e.inicioPlano, i + 1) ?? `Semestre ${i + 1}`);
 
@@ -91,15 +93,19 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
         if (!traz(ev)) return;
         ev.preventDefault();
         try {
-          const origem = JSON.parse(ev.dataTransfer.getData(TIPO_ARRASTO)) as { indice: number; posicao: number };
-          if (origem.indice !== indice) dispatch({ tipo: 'plano', op: { tipo: 'mover', indice: origem.indice, posicao: origem.posicao, para: indice } });
+          const origem = JSON.parse(ev.dataTransfer.getData(TIPO_ARRASTO)) as { indice: unknown; posicao: unknown };
+          // Só índices inteiros que existem neste plano (o dado pode vir de outra janela ou ser fabricado)
+          if (Number.isInteger(origem.indice) && Number.isInteger(origem.posicao) && origem.indice !== indice)
+            dispatch({ tipo: 'plano', op: { tipo: 'mover', indice: origem.indice as number, posicao: origem.posicao as number, para: indice } });
         } catch {
           /* dado de arrasto inválido: ignora */
         }
       }}
     >
       <header className="semestre-topo">
-        <h3 id={`semestre-${k}`}>{titulo}</h3>
+        <h3 id={`semestre-${k}`} ref={tituloRef} tabIndex={-1}>
+          {titulo}
+        </h3>
         <div className="semestre-acoes">
           <button type="button" className="botao pequeno" aria-describedby={idSugestao} aria-label={`Sugerir disciplinas para o ${nome}`} onClick={sugerir}>
             Sugerir
@@ -144,36 +150,40 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
                       <Impacto motor={motor} codigo={item.codigo} />
                     </span>
                   </div>
+                    {totalSemestres > 1 && (
+                      <select
+                        className="mover-para"
+                        value=""
+                        aria-label={`Mover ${d?.nome ?? item.codigo} do ${nome} para outro semestre`}
+                        onChange={(ev) => {
+                          if (ev.target.value === '') return;
+                          tituloRef.current?.focus();
+                          dispatch({ tipo: 'plano', op: { tipo: 'mover', indice, posicao, para: Number(ev.target.value) } });
+                        }}
+                      >
+                        <option value="">Mover para…</option>
+                        {nomesDosSemestres.map((n, i) =>
+                          i === indice ? null : (
+                            <option key={i} value={i}>
+                              {n}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    )}
                   <button
                     type="button"
                     className="botao-x"
                     title="Remover do semestre"
                     aria-label={`Remover ${d?.nome ?? item.codigo} do ${nome}`}
-                    onClick={() => dispatch({ tipo: 'plano', op: { tipo: 'remover', indice, posicao } })}
+                    onClick={() => {
+                      tituloRef.current?.focus();
+                      dispatch({ tipo: 'plano', op: { tipo: 'remover', indice, posicao } });
+                    }}
                   >
                     <span aria-hidden="true">×</span>
                   </button>
                 </div>
-                {totalSemestres > 1 && (
-                  <select
-                    className="mover-para"
-                    value=""
-                    aria-label={`Mover ${d?.nome ?? item.codigo} do ${nome} para outro semestre`}
-                    onChange={(ev) => {
-                      if (ev.target.value !== '')
-                        dispatch({ tipo: 'plano', op: { tipo: 'mover', indice, posicao, para: Number(ev.target.value) } });
-                    }}
-                  >
-                    <option value="">Mover para…</option>
-                    {nomesDosSemestres.map((n, i) =>
-                      i === indice ? null : (
-                        <option key={i} value={i}>
-                          {n}
-                        </option>
-                      ),
-                    )}
-                  </select>
-                )}
                 {item.problemas.map((p, i) => (
                   <p key={i} className="problema">
                     {textosDoProblema(p).map((linha, j) => (

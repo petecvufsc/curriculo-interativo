@@ -1,4 +1,5 @@
 import { aprovadasDe, definirStatus, type OpcoesAluno, type RegistroAluno, type StatusEditavel } from '../../dominio/aluno';
+import { CODIGOS_EXTERNOS_MAX, FORMATO_CODIGO_EXTERNO } from '../../dominio/aluno/tipos';
 import { motorDe, porCodigo, versaoDoRegistro } from './motorEcv';
 
 /** Motor da versão de regras aplicada ao registro hoje (a escolhida; 2028.1 depois do fim da 2020.1). */
@@ -30,7 +31,7 @@ export function mudarOpcoes(registro: RegistroAluno, parcial: Partial<OpcoesAlun
   return { ...registro, opcoes: { ...registro.opcoes, ...parcial } };
 }
 
-const FORMATO_EXTERNO = /^[A-Z]{3}\d{4}$/;
+const FORMATO_EXTERNO = FORMATO_CODIGO_EXTERNO;
 
 /** Normaliza o texto digitado: maiúsculas, sem espaços ("mtm 3101" vira "MTM3101"). */
 export function normalizarCodigo(texto: string): string {
@@ -42,6 +43,7 @@ export function erroCodigoExterno(codigo: string, registro: RegistroAluno): stri
   if (!FORMATO_EXTERNO.test(codigo)) return 'Código inválido. Use o formato AAA9999 (por exemplo, MTM3101).';
   if (porCodigo.has(codigo)) return `${codigo} pertence ao currículo atual: marque-a na grade.`;
   if (registro.status[codigo]) return `${codigo} já foi adicionada.`;
+  if (codigosExternos(registro).length >= CODIGOS_EXTERNOS_MAX) return `Limite de ${CODIGOS_EXTERNOS_MAX} disciplinas de outro currículo atingido.`;
   return null;
 }
 

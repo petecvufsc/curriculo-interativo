@@ -85,8 +85,8 @@ export function versaoEfetiva(escolhida: VersaoRegras, hojeIso: string): VersaoR
 }
 
 export const DESCRICAO_VERSAO: Record<VersaoRegras, string> = {
-  '2020.1': 'Currículo 2020.1 — pré-requisitos atuais (valem até 2027.2)',
-  '2028.1': 'Currículo 2028.1 — novos pré-requisitos (valem a partir de 2028.1)',
+  '2020.1': '2020.1 — atuais (até 2027.2)',
+  '2028.1': '2028.1 — novos (a partir de 2028.1)',
 };
 
 /** Currículo com os pré-requisitos da versão escolhida. A versão 2028.1 é o próprio currículo transcrito. */

@@ -1,4 +1,5 @@
 import type { RegistroAluno, SemestrePlano } from '../../dominio/aluno';
+import { CODIGOS_MAX_POR_SEMESTRE, SEMESTRES_MAX_PLANO } from '../../dominio/aluno/tipos';
 
 export type OperacaoPlano =
   | { tipo: 'adicionarSemestre' }
@@ -16,23 +17,27 @@ function aplicar(semestres: SemestrePlano[], op: OperacaoPlano): SemestrePlano[]
     semestres.map((s, i) => (i === indice ? { codigos: f(s.codigos) } : s));
   switch (op.tipo) {
     case 'adicionarSemestre':
-      return [...semestres, { codigos: [] }];
+      // O plano não passa da duração máxima do curso
+      return semestres.length >= SEMESTRES_MAX_PLANO ? semestres : [...semestres, { codigos: [] }];
     case 'removerSemestre':
       return semestres.filter((_, i) => i !== op.indice);
     case 'limpar':
       return [];
     case 'adicionar':
-      return trocar(op.indice, (c) => [...c, op.codigo]);
+      return trocar(op.indice, (c) => (c.length >= CODIGOS_MAX_POR_SEMESTRE ? c : [...c, op.codigo]));
     case 'remover':
       return trocar(op.indice, (c) => c.filter((_, i) => i !== op.posicao));
     case 'substituir':
       return trocar(op.indice, () => op.codigos);
     case 'definirPlano':
-      return op.semestres.map((codigos) => ({ codigos: [...codigos] }));
+      return op.semestres.slice(0, SEMESTRES_MAX_PLANO).map((codigos) => ({ codigos: codigos.slice(0, CODIGOS_MAX_POR_SEMESTRE) }));
     case 'mover': {
+      // Índices precisam ser inteiros (um dado de arrasto fabricado pode trazer texto: "0" === 0 é falso e duplicaria a disciplina)
+      if (![op.indice, op.posicao, op.para].every(Number.isInteger)) return semestres;
       const codigo = semestres[op.indice]?.codigos[op.posicao];
-      // Origem ou destino inexistente, ou destino igual à origem: nada muda
+      // Origem ou destino inexistente, destino igual à origem ou destino cheio: nada muda
       if (codigo === undefined || !semestres[op.para] || op.para === op.indice) return semestres;
+      if (semestres[op.para].codigos.length >= CODIGOS_MAX_POR_SEMESTRE) return semestres;
       return semestres.map((s, i) => {
         if (i === op.indice) return { codigos: s.codigos.filter((_, p) => p !== op.posicao) };
         if (i === op.para) return { codigos: [...s.codigos, codigo] };

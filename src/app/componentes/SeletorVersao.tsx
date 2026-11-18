@@ -50,8 +50,8 @@ export function SeletorVersao({ e }: { e: EstadoAluno }) {
           ? AVISO_VERSAO_UNICA
           : `${
               versao === '2028.1'
-                ? 'Você está vendo os novos pré-requisitos, que só valem a partir de 2028.1. Para planejar até 2027.2, use a versão 2020.1.'
-                : 'Valem os pré-requisitos atuais. Quatro disciplinas mudam a partir de 2028.1 (a Coordenação adiou a mudança de 2027.1).'
+                ? 'Você está vendo os novos pré-requisitos, que só valem a partir de 2028.1.'
+                : 'Valem os pré-requisitos atuais; quatro disciplinas mudam em 2028.1.'
             } ${AVISO_FIM_VERSAO_2020_1}`}
       </p>
       <details className="versao-mudancas">

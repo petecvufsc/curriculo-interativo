@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react';
+import { SEMESTRES_MAX_PLANO } from '../../../dominio/aluno/tipos';
 import { avaliarPlano, montarGradeOficial, montarPlano } from '../../../dominio/planejamento';
 import type { EstadoAluno } from '../../estado/useEstadoAluno';
 import { PrimeiroSemestre } from './PrimeiroSemestre';
@@ -22,6 +23,7 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
   const idSugestao = useId();
   const avaliacao = useMemo(() => avaliarPlano(motorDoSemestre, registro), [motorDoSemestre, registro]);
   const vazio = registro.plano.semestres.length === 0;
+  const noLimite = registro.plano.semestres.length >= SEMESTRES_MAX_PLANO;
   const [jaViu, setJaViu] = useState(lerJaViu);
   useEffect(() => {
     if (vazio || jaViu) return;
@@ -45,21 +47,39 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
 
   const montar = () => {
     if (!vazio && !window.confirm('Substituir o plano atual por um plano otimizado, montado do zero até o fim do curso?')) return;
-    const { semestres } = montarPlano(motorDoSemestre, registro);
+    const { semestres, completo, faltantes } = montarPlano(motorDoSemestre, registro);
+    const q = registro.opcoes.disciplinasPorSemestre;
+    // Nada montado (tudo cumprido, ou nada coube nos limites): mantém o plano atual e explica, em vez de apagá-lo
+    if (semestres.length === 0) {
+      setOrigem(
+        faltantes.length === 0
+          ? 'Você já cumpriu todas as obrigatórias: não há o que planejar. Seu plano foi mantido.'
+          : 'Nada coube nos limites atuais (créditos por semestre e disciplinas por semestre). Seu plano foi mantido.',
+      );
+      return;
+    }
     dispatch({ tipo: 'plano', op: { tipo: 'definirPlano', semestres } });
     setOrigem(
-      `Plano otimizado, com ${registro.opcoes.disciplinasPorSemestre} disciplinas por semestre: sugestão da ferramenta, não considera a oferta de turmas. Com mais disciplinas por semestre, o curso termina antes.`,
+      `Plano otimizado, com ${q} ${q === 1 ? 'disciplina' : 'disciplinas'} por semestre: sugestão da ferramenta, não considera a oferta de turmas. Com mais disciplinas por semestre, o curso termina antes.` +
+        (completo ? '' : ` O plano chegou ao limite de ${SEMESTRES_MAX_PLANO} semestres e ainda faltam ${faltantes.length} obrigatórias.`),
     );
   };
 
   const montarOficial = () => {
     if (!vazio && !window.confirm('Substituir o plano atual por um plano montado pela grade oficial, a partir da sua fase?')) return;
-    const { semestres, faseAtual } = montarGradeOficial(motorDoSemestre, registro);
+    const { semestres, faseAtual, completo, faltantes } = montarGradeOficial(motorDoSemestre, registro);
+    if (semestres.length === 0) {
+      setOrigem(
+        faseAtual === null
+          ? 'Você já cumpriu todas as obrigatórias: não há o que planejar pela grade oficial. Seu plano foi mantido.'
+          : 'Nada coube nos limites atuais (créditos por semestre). Seu plano foi mantido.',
+      );
+      return;
+    }
     dispatch({ tipo: 'plano', op: { tipo: 'definirPlano', semestres } });
     setOrigem(
-      faseAtual === null
-        ? 'Você já cumpriu todas as obrigatórias: não há o que planejar pela grade oficial.'
-        : `Grade oficial a partir da ${faseAtual}ª fase (a ferramenta deduziu a sua fase pelo que você marcou). Cada semestre traz as obrigatórias de uma fase; as que ficaram para trás entram junto com a primeira. Confira no CAGR.`,
+      `Grade oficial a partir da ${faseAtual}ª fase (a ferramenta deduziu a sua fase pelo que você marcou). Cada semestre traz as obrigatórias de uma fase; as que ficaram para trás entram junto com a primeira. Confira no CAGR.` +
+        (completo ? '' : ` O plano chegou ao limite de ${SEMESTRES_MAX_PLANO} semestres e ainda faltam ${faltantes.length} obrigatórias.`),
     );
   };
 
@@ -124,7 +144,13 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
         <button type="button" className="botao" onClick={montar}>
           Montar plano otimizado
         </button>
-        <button type="button" className="botao" onClick={() => dispatch({ tipo: 'plano', op: { tipo: 'adicionarSemestre' } })}>
+        <button
+          type="button"
+          className="botao"
+          disabled={noLimite}
+          title={noLimite ? `O plano tem no máximo ${SEMESTRES_MAX_PLANO} semestres (duração máxima do curso)` : undefined}
+          onClick={() => dispatch({ tipo: 'plano', op: { tipo: 'adicionarSemestre' } })}
+        >
           + Adicionar semestre
         </button>
         <button type="button" className="botao perigo" onClick={limpar}>
@@ -135,7 +161,7 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
         Cada semestre usa os pré-requisitos do seu período: até 2027.2 valem os atuais e, a partir de 2028.1, os novos
         (ECV2501, ECV2505, ECV2704 e ECV2932).
       </p>
-      {origem && !vazio && (
+      {origem && (
         <p className="nota-origem" role="status">
           {origem}
         </p>

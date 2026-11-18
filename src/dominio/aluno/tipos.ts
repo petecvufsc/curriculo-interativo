@@ -20,6 +20,14 @@ export const CHAVE_LOCAL_STORAGE = 'curriculo-interativo-ecv:v1';
 export const LIMITE_AULAS_PADRAO = 30;
 /** Quantidade padrão de disciplinas que o botão "Sugerir" escolhe por semestre (§11). */
 export const DISCIPLINAS_POR_SEMESTRE_PADRAO = 5;
+/** Duração máxima do curso no PDF (15 semestres): o plano não passa disso (também protege a página de arquivos absurdos). */
+export const SEMESTRES_MAX_PLANO = 15;
+/** Teto de disciplinas num mesmo semestre do plano (o limite de créditos já é bem menor; isto barra arquivos fabricados). */
+export const CODIGOS_MAX_POR_SEMESTRE = 40;
+/** Teto de disciplinas "de outro currículo" no histórico (código fora do currículo atual). */
+export const CODIGOS_EXTERNOS_MAX = 500;
+/** Formato de código de disciplina da UFSC: três letras e quatro dígitos (usado também para códigos de outro currículo). */
+export const FORMATO_CODIGO_EXTERNO = /^[A-Z]{3}\d{4}$/;
 /** Faixa aceita para a quantidade de disciplinas por semestre. */
 export const DISCIPLINAS_POR_SEMESTRE_MIN = 1;
 export const DISCIPLINAS_POR_SEMESTRE_MAX = 12;

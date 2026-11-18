@@ -41,6 +41,12 @@ export function App() {
       </header>
       <div className="corpo">
         <main className="principal" id="conteudo" tabIndex={-1}>
+          {e.naoSalvou && (
+            <p className="aviso aviso-erro aviso-armazenamento" role="alert">
+              <strong>Não foi possível salvar neste navegador</strong> (armazenamento cheio, bloqueado ou janela privativa). O que
+              você fizer agora se perde ao fechar a página. Use &quot;Exportar (.json)&quot; para guardar seus dados.
+            </p>
+          )}
           <ResumoIntegralizacao e={e} />
           <SeletorVersao e={e} />
           <Abas aba={e.aba} onMudar={(aba) => e.dispatch({ tipo: 'aba', aba })} />
