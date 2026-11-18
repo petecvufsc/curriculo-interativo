@@ -69,10 +69,11 @@
 - 18/11/2026 — **Versões das regras de pré-requisito (decisão D5).** Comunicado da Coordenação (repassado pelo CALEC; o usuário confirmou que é oficial): ECV2501, ECV2505, ECV2932 e ECV2704 ganham pré-requisitos novos, e a entrada em vigor foi **adiada de 2027.1 para 2028.1** pelo NDE e pelo Colegiado.
   - **Problema encontrado:** `ecv-2020-1.json` (transcrito do PDF) já trazia os pré-requisitos **novos**, então o app os aplicava a todos desde já, ao contrário da decisão da Coordenação.
   - **Solução:** caixa seletora "Regras de pré-requisitos" com **2020.1** (atuais, padrão) e **2028.1** (novos). Os dados do JSON ficam como estão (= 2028.1); a versão 2020.1 troca as quatro disciplinas pelos pré-requisitos antigos do comunicado (`dominio/curriculos/versoes.ts`). A escolha vai em `opcoes.versaoRegras`, é salva no navegador e exportada. Arquivos antigos, sem o campo, abrem em 2020.1.
-  - Aviso fixo na tela, na Ajuda e no seletor: "A partir de novembro de 2027, apenas a versão 2028.1 estará disponível". **A data é aproximada (pedido do usuário); confirmar com a Coordenação.** O aviso é só texto: o app não desliga a versão 2020.1 sozinho.
+  - Aviso na tela, na Ajuda e no seletor: "A partir de novembro de 2027, apenas a versão 2028.1 estará disponível".
+  - **Fim automático da versão 2020.1:** a data de corte é `DATA_FIM_VERSAO_2020_1 = '2027-11-01'` em `dominio/curriculos/versoes.ts`. A partir dela, pela data do aparelho, o app oferece só a 2028.1 e aplica a 2028.1 mesmo a quem tinha a 2020.1 salva (o histórico não muda); o aviso passa a dizer que a 2020.1 foi encerrada. **A data é aproximada (pedido do usuário); confirmar com a Coordenação e, se mudar, editar só essa constante.** Quem tiver o aparelho com data errada vê a versão correspondente a essa data.
   - Sem regra de transição por semestre: o aluno escolhe a versão (decisão do usuário). Quem já foi aprovado não é afetado.
   - **Defeito antigo corrigido:** `serializar` gravava só 2 das opções; "disciplinas por semestre" e "primeiro semestre" se perdiam ao recarregar e ao exportar. Agora grava todas, com teste de ida e volta.
-  - 362 testes, build ok. **Falta enviar:** `git push` na pasta de publicação.
+  - 366 testes, build ok. **Falta enviar:** `git push` na pasta de publicação.
 
 ## Decisões
 - 18/11/2026, decisão D5 — **Duas versões das regras de pré-requisito do currículo 2020.1:** 2020.1 (atuais, até 2027.2) e 2028.1 (novos, a partir de 2028.1), por escolha do aluno. Fonte: comunicado oficial da Coordenação (via CALEC). Exceção à D1 (PDF como fonte única) apenas para esses quatro pré-requisitos.

@@ -2,11 +2,13 @@ import { useId } from 'react';
 import {
   ALTERACOES_2028_1,
   AVISO_FIM_VERSAO_2020_1,
+  AVISO_VERSAO_UNICA,
   DESCRICAO_VERSAO,
-  VERSOES_REGRAS,
+  versao2020Disponivel,
   versaoRegrasValida,
+  versoesDisponiveis,
 } from '../../dominio/curriculos/versoes';
-import { porCodigo } from '../estado/motorEcv';
+import { hojeIso, porCodigo } from '../estado/motorEcv';
 import type { EstadoAluno } from '../estado/useEstadoAluno';
 
 /** "A + B" (todas) e " ou " entre alternativas; vazio = sem pré-requisito. */
@@ -18,7 +20,10 @@ const textoRequisito = (grupos: string[][]) => (grupos.length === 0 ? 'nenhum' :
  */
 export function SeletorVersao({ e }: { e: EstadoAluno }) {
   const id = useId();
-  const versao = e.registro.opcoes.versaoRegras;
+  // Versão aplicada hoje: depois da data de corte, a 2020.1 some e só resta a 2028.1 (mesmo que a 2020.1 esteja salva).
+  const versao = e.versao;
+  const disponiveis = versoesDisponiveis(hojeIso());
+  const encerrada = !versao2020Disponivel(hojeIso());
   return (
     <section className="versao" aria-labelledby={`${id}-rotulo`}>
       <div className="versao-linha">
@@ -33,7 +38,7 @@ export function SeletorVersao({ e }: { e: EstadoAluno }) {
             if (versaoRegrasValida(ev.target.value)) e.dispatch({ tipo: 'opcoes', opcoes: { versaoRegras: ev.target.value } });
           }}
         >
-          {VERSOES_REGRAS.map((v) => (
+          {disponiveis.map((v) => (
             <option key={v} value={v}>
               {DESCRICAO_VERSAO[v]}
             </option>
@@ -41,10 +46,13 @@ export function SeletorVersao({ e }: { e: EstadoAluno }) {
         </select>
       </div>
       <p className="versao-aviso">
-        {versao === '2028.1'
-          ? 'Você está vendo os novos pré-requisitos, que só valem a partir de 2028.1. Para planejar até 2027.2, use a versão 2020.1.'
-          : 'Valem os pré-requisitos atuais. Quatro disciplinas mudam a partir de 2028.1 (a Coordenação adiou a mudança de 2027.1).'}{' '}
-        {AVISO_FIM_VERSAO_2020_1}
+        {encerrada
+          ? AVISO_VERSAO_UNICA
+          : `${
+              versao === '2028.1'
+                ? 'Você está vendo os novos pré-requisitos, que só valem a partir de 2028.1. Para planejar até 2027.2, use a versão 2020.1.'
+                : 'Valem os pré-requisitos atuais. Quatro disciplinas mudam a partir de 2028.1 (a Coordenação adiou a mudança de 2027.1).'
+            } ${AVISO_FIM_VERSAO_2020_1}`}
       </p>
       <details className="versao-mudancas">
         <summary>Ver o que muda em 2028.1</summary>

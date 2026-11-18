@@ -1,7 +1,7 @@
 // Currículo usado pelo app (ecv-2020-1.json) e os motores indexados, um por versão das regras de pré-requisito.
 import json from '../../dominio/curriculos/ecv-2020-1.json';
 import { curriculoParaAluno } from '../../dominio/curriculos/paraAluno';
-import { VERSAO_REGRAS_PADRAO, VERSOES_REGRAS, curriculoDaVersao, type VersaoRegras } from '../../dominio/curriculos/versoes';
+import { VERSAO_REGRAS_PADRAO, VERSOES_REGRAS, curriculoDaVersao, versaoEfetiva, type VersaoRegras } from '../../dominio/curriculos/versoes';
 import { criarMotor, type Motor } from '../../dominio/regras';
 import type { Curriculo, Disciplina } from '../../dominio/tipos';
 
@@ -17,6 +17,12 @@ const motores = Object.fromEntries(VERSOES_REGRAS.map((v) => [v, criarMotor(curr
 export function motorDe(versao: VersaoRegras): Motor {
   return motores[versao];
 }
+
+/** Data de hoje no fuso do aparelho, "AAAA-MM-DD" (a versão 2020.1 tem data de encerramento). */
+export const hojeIso = (): string => new Date().toLocaleDateString('sv-SE');
+
+/** Versão aplicada ao registro hoje: a escolhida, ou 2028.1 depois do encerramento da 2020.1. */
+export const versaoDoRegistro = (versaoEscolhida: VersaoRegras): VersaoRegras => versaoEfetiva(versaoEscolhida, hojeIso());
 
 /** Motor da versão padrão (2020.1). O app usa `motorDe(registro.opcoes.versaoRegras)`; este serve aos testes. */
 export const motor = motorDe(VERSAO_REGRAS_PADRAO);

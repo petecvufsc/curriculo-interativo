@@ -43,9 +43,34 @@ export const ALTERACOES_2028_1: readonly AlteracaoPreRequisitos[] = [
   },
 ];
 
-/** Aviso mostrado ao aluno sobre o fim da versão 2020.1. Data aproximada: confirmar com a Coordenação. */
+/**
+ * Primeiro dia em que a versão 2020.1 deixa de ser oferecida: dali em diante o app usa só a 2028.1.
+ * Data aproximada, definida pelo PET ("novembro de 2027"): confirmar com a Coordenação. Para mudar, basta editar aqui.
+ */
+export const DATA_FIM_VERSAO_2020_1 = '2027-11-01';
+
+/** Aviso mostrado enquanto a versão 2020.1 ainda existe. */
 export const AVISO_FIM_VERSAO_2020_1 =
   'A partir de novembro de 2027, apenas a versão 2028.1 estará disponível neste aplicativo.';
+
+/** Aviso mostrado depois da data de corte. */
+export const AVISO_VERSAO_UNICA =
+  'A versão 2020.1 foi encerrada em novembro de 2027: valem os pré-requisitos da versão 2028.1.';
+
+/** A versão 2020.1 ainda pode ser escolhida em `hojeIso` ("AAAA-MM-DD")? Comparação de texto ISO, sem fuso. */
+export function versao2020Disponivel(hojeIso: string): boolean {
+  return hojeIso < DATA_FIM_VERSAO_2020_1;
+}
+
+/** Versões que o aluno pode escolher em `hojeIso`. */
+export function versoesDisponiveis(hojeIso: string): readonly VersaoRegras[] {
+  return versao2020Disponivel(hojeIso) ? VERSOES_REGRAS : ['2028.1'];
+}
+
+/** Versão realmente aplicada: a escolhida, ou a 2028.1 se a 2020.1 já foi encerrada (mesmo que esteja salva). */
+export function versaoEfetiva(escolhida: VersaoRegras, hojeIso: string): VersaoRegras {
+  return versao2020Disponivel(hojeIso) ? escolhida : '2028.1';
+}
 
 export const DESCRICAO_VERSAO: Record<VersaoRegras, string> = {
   '2020.1': 'Currículo 2020.1 — pré-requisitos atuais (valem até 2027.2)',

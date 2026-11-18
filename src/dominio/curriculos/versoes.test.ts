@@ -3,10 +3,14 @@ import json from './ecv-2020-1.json';
 import {
   ALTERACOES_2028_1,
   AVISO_FIM_VERSAO_2020_1,
+  DATA_FIM_VERSAO_2020_1,
   VERSAO_REGRAS_PADRAO,
   VERSOES_REGRAS,
   curriculoDaVersao,
+  versao2020Disponivel,
+  versaoEfetiva,
   versaoRegrasValida,
+  versoesDisponiveis,
 } from './versoes';
 import { criarMotor } from '../regras';
 import type { Curriculo } from '../tipos';
@@ -82,6 +86,23 @@ describe('versões das regras de pré-requisito (decisão D5)', () => {
     expect(motor2020.requisitosAtendidos('ECV2932', set('ECV2603'))).toBe(false);
     expect(motor2028.requisitosAtendidos('ECV2932', set('ECV2603'))).toBe(true);
     expect(motor2028.requisitosAtendidos('ECV2932', set('ECV2405'))).toBe(false);
+  });
+
+  it('a versão 2020.1 deixa de existir na data de corte (1º de novembro de 2027), sozinha', () => {
+    expect(DATA_FIM_VERSAO_2020_1).toBe('2027-11-01');
+    expect(versao2020Disponivel('2026-11-18')).toBe(true);
+    expect(versao2020Disponivel('2027-10-31')).toBe(true);
+    expect(versao2020Disponivel('2027-11-01')).toBe(false);
+    expect(versao2020Disponivel('2028-03-01')).toBe(false);
+    expect(versoesDisponiveis('2027-10-31')).toEqual(['2020.1', '2028.1']);
+    expect(versoesDisponiveis('2027-11-01')).toEqual(['2028.1']);
+  });
+
+  it('depois do corte a versão efetiva é sempre 2028.1, mesmo que a 2020.1 esteja salva; antes, vale a escolhida', () => {
+    expect(versaoEfetiva('2020.1', '2027-10-31')).toBe('2020.1');
+    expect(versaoEfetiva('2028.1', '2027-10-31')).toBe('2028.1');
+    expect(versaoEfetiva('2020.1', '2027-11-01')).toBe('2028.1');
+    expect(versaoEfetiva('2028.1', '2030-01-01')).toBe('2028.1');
   });
 
   it('o aviso fala do fim da versão 2020.1', () => {

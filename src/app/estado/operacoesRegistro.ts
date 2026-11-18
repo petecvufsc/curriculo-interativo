@@ -1,8 +1,8 @@
 import { aprovadasDe, definirStatus, type OpcoesAluno, type RegistroAluno, type StatusEditavel } from '../../dominio/aluno';
-import { motorDe, porCodigo } from './motorEcv';
+import { motorDe, porCodigo, versaoDoRegistro } from './motorEcv';
 
-/** Motor da versão de regras escolhida no registro (2020.1 ou 2028.1). */
-export const motorDoRegistro = (registro: RegistroAluno) => motorDe(registro.opcoes.versaoRegras);
+/** Motor da versão de regras aplicada ao registro hoje (a escolhida; 2028.1 depois do fim da 2020.1). */
+export const motorDoRegistro = (registro: RegistroAluno) => motorDe(versaoDoRegistro(registro.opcoes.versaoRegras));
 
 export function definir(registro: RegistroAluno, codigo: string, status: StatusEditavel): RegistroAluno {
   return definirStatus(motorDoRegistro(registro), registro, codigo, status);

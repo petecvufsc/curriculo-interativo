@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Seletor de versão das regras de pré-requisito (decisão D5): 2020.1 (atuais) e 2028.1 (novos).
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
@@ -83,6 +83,40 @@ describe('seletor de versão das regras', () => {
     render(<App />);
     expect(seletor().value).toBe('2028.1');
     expect(screen.getByText(/Você está vendo os novos pré-requisitos/)).toBeTruthy();
+  });
+
+  it('depois de novembro de 2027 a versão 2020.1 some sozinha: só a 2028.1 vale, mesmo com a 2020.1 salva', async () => {
+    // Registro salvo antes do corte, na versão 2020.1
+    const u0 = userEvent.setup();
+    const antes = render(<App />);
+    await u0.click(marcar('Física I'));
+    antes.unmount();
+
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2027-11-02T12:00:00') });
+    try {
+      const u = userEvent.setup();
+      render(<App />);
+      expect(within(seletor()).queryByRole('option', { name: /Currículo 2020\.1/ })).toBeNull();
+      expect(seletor().value).toBe('2028.1');
+      expect(screen.getByText(/A versão 2020\.1 foi encerrada em novembro de 2027/)).toBeTruthy();
+      expect(marcar('Física I').checked).toBe(true); // o histórico continua
+
+      // Os pré-requisitos aplicados são os novos: Expressão Oral e Escrita exige as sete da 4ª fase
+      const detalhe = await abrirDetalhe(u, 'Expressão Oral e Escrita');
+      expect(detalhe.getByText('Pré-requisitos diretos')).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('antes do corte, as duas versões aparecem', () => {
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date('2027-10-31T12:00:00') });
+    try {
+      render(<App />);
+      expect(within(seletor()).getAllByRole('option')).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('no planejamento, ECV2704 só entra no plano em 2028.1 depois das sete da 4ª fase', async () => {
