@@ -12,6 +12,8 @@
 .barra-preenchimento { height: 100%; background: var(--primario-bg); }
 
 .botoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* A dica ocupa a linha toda, acima dos botões (sem ela, o texto empurrava "Simular" para o lado) */
+.botoes > .dica-simular { grid-column: 1 / -1; }
 
 .opcao { display: flex; gap: 10px; align-items: flex-start; font-size: 0.9375rem; cursor: pointer; }
 .opcao input { margin-top: 1px; }

@@ -51,7 +51,7 @@ export const DATA_FIM_VERSAO_2020_1 = '2027-11-01';
 
 /** Aviso mostrado enquanto a versão 2020.1 ainda existe. */
 export const AVISO_FIM_VERSAO_2020_1 =
-  'A partir de novembro de 2027, apenas a versão 2028.1 estará disponível neste aplicativo.';
+  'A partir de novembro de 2027, apenas a versão 2028.1 estará disponível neste site.';
 
 /** Aviso mostrado depois da data de corte. */
 export const AVISO_VERSAO_UNICA =

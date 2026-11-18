@@ -43,7 +43,7 @@ export function PainelLateral({ e }: { e: EstadoAluno }) {
         <BarraProgresso id="prog" rotulo="Optativas" p={p.optativas} />
       </section>
       <div className="botoes">
-        {!e.simulou && <p className="muted largura-total">Clique em &quot;Simular&quot; para ver o que você já pode cursar.</p>}
+        {!e.simulou && <p className="muted dica-simular">Clique em &quot;Simular&quot; para ver o que você já pode cursar.</p>}
         <button type="button" className="botao primario" onClick={() => dispatch({ tipo: 'simular' })}>
           Simular
         </button>
