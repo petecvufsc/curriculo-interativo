@@ -22,16 +22,13 @@ export function PainelLateral({ e }: { e: EstadoAluno }) {
   };
   return (
     <aside id="painel" className="painel" aria-label="Resumo e ações" tabIndex={-1}>
-      <section aria-labelledby="titulo-disponiveis" aria-live="polite">
+      {/* Só aparece depois de "Simular": antes disso não há nada a mostrar, e a dica fica junto do botão */}
+      <section aria-labelledby="titulo-disponiveis" aria-live="polite" hidden={!e.simulou}>
         <h2 id="titulo-disponiveis">Disciplinas disponíveis</h2>
-        {e.simulou ? (
-          <ul className="totais">
-            <Totais rotulo="Obrigatórias" t={s.totaisDisponiveis.obrigatorias} />
-            <Totais rotulo="Optativas" t={s.totaisDisponiveis.optativas} />
-          </ul>
-        ) : (
-          <p className="muted">Clique em &quot;Simular&quot; para ver o que você já pode cursar.</p>
-        )}
+        <ul className="totais">
+          <Totais rotulo="Obrigatórias" t={s.totaisDisponiveis.obrigatorias} />
+          <Totais rotulo="Optativas" t={s.totaisDisponiveis.optativas} />
+        </ul>
       </section>
       <section aria-labelledby="titulo-cursadas">
         <h2 id="titulo-cursadas">Disciplinas cursadas</h2>
@@ -46,6 +43,7 @@ export function PainelLateral({ e }: { e: EstadoAluno }) {
         <BarraProgresso id="prog" rotulo="Optativas" p={p.optativas} />
       </section>
       <div className="botoes">
+        {!e.simulou && <p className="muted largura-total">Clique em &quot;Simular&quot; para ver o que você já pode cursar.</p>}
         <button type="button" className="botao primario" onClick={() => dispatch({ tipo: 'simular' })}>
           Simular
         </button>

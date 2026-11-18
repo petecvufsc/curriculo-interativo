@@ -4,7 +4,7 @@
  * selo de texto com símbolo. Contraste (WCAG AA) conferido por script no navegador.
  */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --fonte: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
 
@@ -44,8 +44,9 @@
   --sombra: 0 1px 2px rgb(20 30 25 / 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+/* Decisão do PET: o tema padrão é sempre o claro (como no programa original), mesmo que o aparelho use modo escuro.
+   O conjunto escuro fica guardado e só vale com data-theme="dark" na raiz. */
+:root[data-theme='dark'] {
     --fundo: #131917;
     --superficie: #1b2320;
     --superficie-2: #232d29;
@@ -79,5 +80,4 @@
     --erro-tinta: #4b1e2a;
     --sucesso-tinta: #163a2f;
     --sombra: none;
-  }
 }

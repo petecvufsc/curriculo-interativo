@@ -120,6 +120,42 @@ describe('orientação na tela', () => {
     expect(screen.getByText(/Ao fim do plano:/)).toBeTruthy();
   });
 
+  it('depois do primeiro plano, o "Como funciona" não abre sozinho nas visitas seguintes', async () => {
+    const u = userEvent.setup();
+    const primeira = render(<App />);
+    await u.click(screen.getByRole('tab', { name: 'Planejamento' }));
+    await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
+    const original = window.confirm;
+    window.confirm = () => true;
+    try {
+      await u.click(screen.getByRole('button', { name: 'Limpar plano' }));
+    } finally {
+      window.confirm = original;
+    }
+    primeira.unmount();
+
+    render(<App />);
+    await u.click(screen.getByRole('tab', { name: 'Planejamento' }));
+    expect((screen.getByText('Como funciona o planejamento').closest('details') as HTMLDetailsElement).open).toBe(false);
+  });
+
+  it('o painel só mostra "Disciplinas disponíveis" depois de Simular; antes, a dica fica junto do botão', async () => {
+    const u = userEvent.setup();
+    render(<App />);
+    expect(screen.getByText(/Clique em "Simular"/)).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Disciplinas disponíveis' })).toBeNull();
+    await u.click(within(screen.getByLabelText('Resumo e ações')).getByRole('button', { name: 'Simular' }));
+    expect(screen.getByRole('heading', { name: 'Disciplinas disponíveis' })).toBeTruthy();
+    expect(screen.queryByText(/Clique em "Simular"/)).toBeNull();
+  });
+
+  it('o tema é sempre o claro (sem regra de modo escuro automático)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync('src/app/estilos/tokens.css', 'utf8') + readFileSync('src/app/estilos/base.css', 'utf8');
+    expect(css).not.toMatch(/prefers-color-scheme/);
+    expect(readFileSync('index.html', 'utf8')).toMatch(/name="color-scheme" content="light"/);
+  });
+
   it('remover um semestre com disciplinas pede confirmação', async () => {
     const u = userEvent.setup();
     render(<App />);

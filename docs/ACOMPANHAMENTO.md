@@ -59,6 +59,13 @@
   - Cabeçalho: "Última atualização: dd/mm/aaaa" (data do build, gravada pelo Vite), no lugar do rótulo do currículo; o currículo usado continua dito no rodapé.
   - Fluxo `projeto/.github/workflows/publicar.yml` (testa e publica no Pages) e `scripts/exportar-publicacao.mjs` (pasta limpa, 1 commit assinado pelo PET, sem `referencias/` nem a lógica descompilada; `--atualizar` para as próximas vezes). Validado em pasta limpa: 334 testes e build ok.
   - Guia passo a passo: [publicacao.md](publicacao.md). **Falta o usuário:** criar a conta e o repositório no GitHub, enviar a pasta, ligar o Pages e editar a página Downloads do WordPress.
+- 18/11/2026 — **Publicado no GitHub Pages** (`petecvufsc/curriculo-interativo`, fluxo verde em 54 s) e linkado na página Downloads do site do PET (primeira linha da tabela "Currículo Interativo"). Revisão de UX/UI do app publicado (visual, só em desktop) e melhorias aplicadas a pedido do usuário:
+  - **Decisão D4:** o tema é sempre o claro, mesmo com o aparelho em modo escuro (a regra `prefers-color-scheme` saiu; o conjunto escuro fica guardado atrás de `data-theme="dark"`).
+  - "Como funciona o planejamento" abre só na primeira vez; depois do primeiro plano não volta a abrir sozinho (marca no navegador).
+  - Campo do primeiro semestre: exemplo "Ex.: 2027.1" em cinza escuro, para não parecer desativado.
+  - Painel lateral: "Disciplinas disponíveis" só aparece depois de Simular; antes, a dica fica junto do botão.
+  - Alvos de toque: em telas de toque já eram de 44 a 48 px; no computador ficaram como estavam (24 px ou mais, WCAG 2.2 AA). Não medido no celular desta vez.
+  - 337 testes, build ok. **Falta enviar:** `git push` na pasta de publicação.
 
 ## Decisões
 - 11/11/2026, decisão D1 — **A fonte de verdade das regras é o currículo oficial PDF 2020.1.** O conjunto do programa original fica só como referência para os testes de paridade e para documentar as divergências.

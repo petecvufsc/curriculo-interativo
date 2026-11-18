@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { avaliarPlano, montarPlano } from '../../../dominio/planejamento';
 import { motor } from '../../estado/motorEcv';
 import type { EstadoAluno } from '../../estado/useEstadoAluno';
@@ -8,11 +8,31 @@ import { ResumoDoPlano } from './ResumoDoPlano';
 import { SemestrePlanejado } from './SemestrePlanejado';
 import { ROTULO_SUGESTAO } from './textosPlano';
 
+const CHAVE_AJUDA_VISTA = 'curriculo-interativo:ajuda-planejamento-vista';
+
+function lerJaViu(): boolean {
+  try {
+    return localStorage.getItem(CHAVE_AJUDA_VISTA) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
   const { registro, dispatch } = e;
   const idSugestao = useId();
   const avaliacao = useMemo(() => avaliarPlano(motor, registro), [registro]);
   const vazio = registro.plano.semestres.length === 0;
+  const [jaViu, setJaViu] = useState(lerJaViu);
+  useEffect(() => {
+    if (vazio || jaViu) return;
+    setJaViu(true);
+    try {
+      localStorage.setItem(CHAVE_AJUDA_VISTA, '1');
+    } catch {
+      /* sem armazenamento (modo privado): a ajuda só volta a abrir nesta visita */
+    }
+  }, [vazio, jaViu]);
 
   const limpar = () => {
     if (vazio || window.confirm('Remover todos os semestres do plano?')) dispatch({ tipo: 'plano', op: { tipo: 'limpar' } });
@@ -27,8 +47,8 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
   return (
     <section className="planejamento" aria-labelledby="titulo-planejamento">
       <h2 id="titulo-planejamento">Planejamento de semestres</h2>
-      {/* Aberto enquanto o plano está vazio (quem chega aqui pela primeira vez); fecha ao criar o primeiro semestre */}
-      <details className="como-funciona" open={vazio}>
+      {/* Aberto só para quem ainda não montou nenhum plano; fecha ao criar o primeiro semestre e não volta a abrir sozinho */}
+      <details className="como-funciona" open={vazio && !jaViu}>
         <summary>Como funciona o planejamento</summary>
         <div className="como-funciona-corpo">
           <p>

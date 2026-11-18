@@ -60,8 +60,10 @@ button { font-family: inherit; }
   background: var(--superficie); color: var(--texto); border: 1px solid var(--borda-forte); border-radius: 4px;
 }
 .campo-numero { width: 5.5rem; }
+/* O exemplo não pode parecer um campo desativado: cinza escuro, não claro (contraste ≥ 4,5:1) */
+.campo::placeholder { color: var(--texto-suave); opacity: 1; }
 .link { all: unset; cursor: pointer; color: var(--foco); text-decoration: underline; text-underline-offset: 2px; border-radius: 2px; padding: 3px 0; display: inline-block; }
-@media (prefers-color-scheme: dark) { .link { color: #9ec5ff; } }
+:root[data-theme='dark'] .link { color: #9ec5ff; }
 .link:focus-visible { outline: 3px solid var(--foco); outline-offset: 1px; }
 
 /* Caixas de seleção: alvo de 24 px ou mais */

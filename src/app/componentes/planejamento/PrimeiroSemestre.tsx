@@ -21,7 +21,7 @@ export function PrimeiroSemestre({ inicial, onMudar }: Props) {
         className="campo campo-numero"
         type="text"
         inputMode="decimal"
-        placeholder={exemplo}
+        placeholder={`Ex.: ${exemplo}`}
         maxLength={6}
         value={texto}
         aria-invalid={invalido}
