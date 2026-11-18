@@ -8,6 +8,7 @@ import {
   type SemestreAvaliado,
 } from '../../../dominio/planejamento';
 import { textoCreditos } from '../../estado/creditos';
+import { versaoDoSemestre } from '../../../dominio/curriculos/versoes';
 import type { Motor } from '../../../dominio/regras';
 import { porCodigo } from '../../estado/motorEcv';
 import type { EstadoAluno } from '../../estado/useEstadoAluno';
@@ -35,16 +36,21 @@ function Impacto({ motor, codigo }: { motor: Motor; codigo: string }) {
 
 /** Um semestre do plano, como uma coluna: título, medidor de créditos, linhas enxutas e a busca. */
 export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
-  const { registro, dispatch, motor } = e;
+  const { registro, dispatch, motorDoSemestre } = e;
   const k = s.numero;
   const indice = k - 1;
-  const disponiveis = useMemo(() => disponiveisNoSemestre(motor, registro, k), [motor, registro, k]);
-  const rotulo = rotuloSemestre(registro.opcoes.semestreInicial, k);
+  // Regras do período deste semestre (até 2027.2 as atuais; de 2028.1 em diante as novas)
+  const motor = motorDoSemestre(k);
+  const disponiveis = useMemo(() => disponiveisNoSemestre(motorDoSemestre, registro, k), [motorDoSemestre, registro, k]);
+  const rotulo = rotuloSemestre(e.inicioPlano, k);
   const proximo = k === 1 ? ' (próximo)' : '';
-  const titulo = rotulo ? `${rotulo}${proximo}` : `Semestre ${k}${proximo}`;
-  // Nome usado nos nomes acessíveis dos botões: sempre o número, com o nome real quando houver
-  const nome = rotulo ? `semestre ${k} (${rotulo})` : `semestre ${k}`;
+  const titulo = `${rotulo ?? `Semestre ${k}`}${proximo}`;
+  // Nome usado nos nomes acessíveis e nas perguntas de confirmação: o número do semestre (o nome real está no título)
+  const nome = `semestre ${k}`;
   const faixa = motor.curriculo.integralizacao?.aulasSemanais ?? null;
+  // Primeiro semestre do plano em que passam a valer os novos pré-requisitos: avisa a virada
+  const virada =
+    versaoDoSemestre(rotulo) === '2028.1' && (k === 1 || versaoDoSemestre(rotuloSemestre(e.inicioPlano, k - 1)) !== '2028.1');
 
   const sugerir = () => {
     if (s.itens.length > 0 && !window.confirm(`Substituir as disciplinas do ${nome} pela sugestão automática?`)) return;
@@ -72,6 +78,9 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
         </div>
       </header>
 
+      {virada && (
+        <p className="semestre-virada">A partir daqui valem os novos pré-requisitos (versão 2028.1).</p>
+      )}
       <p className="semestre-total">
         <strong>
           {s.totalAulas} créditos · {s.totalHorasAula} h-a

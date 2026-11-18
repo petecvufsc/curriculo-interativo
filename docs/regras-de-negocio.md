@@ -135,8 +135,9 @@ Cada disciplina é adicionada enquanto houver menos de `quantidade` (opção do 
   - ECV2505: ECV2401 e ECV2404 → ECV2401, ECV2404 e MTM3131.
   - ECV2932: ECV2405 → ECV2603.
   - ECV2704: sem pré-requisito → as sete obrigatórias da 4ª fase (ECV2401, ECV2402, ECV2403, ECV2404, ECV2405, ENS5101, MTM3103).
-  A escolha vale para a grade, a simulação e o planejamento inteiros; não há regra de transição por semestre. Ausente ou inválido volta a 2020.1.
-- **Nome real do semestre** (`opcoes.semestreInicial`, "AAAA.1" ou "AAAA.2"): o semestre `k` do plano recebe o nome contado de meio em meio ano (2027.1, 2027.2, 2028.1…). É só um rótulo: não muda nenhuma regra. Sem valor, os semestres seguem como "Semestre 1 (próximo)", "Semestre 2"…
+  A escolha (e o fim automático da 2020.1 em 1/11/2027) vale para a **grade e a simulação**. Ausente ou inválido volta a 2020.1.
+  **No planejamento, cada semestre usa as regras do seu período**, pelo nome do semestre: até 2027.2, as atuais; de 2028.1 em diante, as novas. Por isso o primeiro semestre do plano é obrigatório (AAAA.1 ou AAAA.2, escolhido numa lista; sem escolha, o próximo do calendário) e os demais seguem em sequência, sem renomear. O que entra num semestre conta como cumprido para os seguintes, e a sugestão e a montagem do plano também usam as regras do semestre em que a disciplina cairia.
+- **Nome do semestre** (`opcoes.semestreInicial`, "AAAA.1" ou "AAAA.2"): obrigatório na interface (lista, sem texto livre). O semestre `k` do plano recebe o nome contado de meio em meio ano (2027.1, 2027.2, 2028.1…) e o nome define quais pré-requisitos valem nele (decisão D5). Arquivos antigos sem o campo usam o próximo semestre do calendário.
 - **A sugestão não verifica conflito de horário nem a oferta do semestre.** O currículo (PDF) não traz horários de turma, e sem esses dados é impossível garantir que não há conflito. A interface avisa isso na nota da sugestão.
 
 ## 12. Registro salvo e arquivo exportado (etapa 4)

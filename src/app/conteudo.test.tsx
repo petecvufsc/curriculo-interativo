@@ -1,13 +1,20 @@
 // @vitest-environment jsdom
 // Conteúdo pedido pelo usuário: intercâmbios fora do app e explicação do planejamento.
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
 import { optativas } from './estado/motorEcv';
+import { fixarHoje } from './testeAuxiliar';
 
-beforeEach(() => window.localStorage.clear());
-afterEach(cleanup);
+beforeEach(() => {
+  window.localStorage.clear();
+  fixarHoje();
+});
+afterEach(() => {
+  vi.useRealTimers();
+  cleanup();
+});
 
 describe('optativas sem intercâmbio', () => {
   it('a lista de optativas não tem as disciplinas de intercâmbio (inscrição só pela coordenação)', () => {
@@ -24,7 +31,7 @@ describe('optativas sem intercâmbio', () => {
     render(<App />);
     await u.click(screen.getByRole('tab', { name: 'Planejamento' }));
     await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
-    const sem = within(screen.getByRole('listitem', { name: /^Semestre 1/ }));
+    const sem = within(screen.getByRole('listitem', { name: /^2027\.1/ }));
     await u.click(sem.getByText('+ Adicionar disciplina'));
     await u.type(sem.getByRole('searchbox', { name: 'Buscar disciplina para o semestre 1' }), 'Intercâmbio');
     expect(sem.queryByRole('button', { name: /Intercâmbio/ })).toBeNull();
@@ -168,7 +175,7 @@ describe('orientação na tela', () => {
     await u.click(screen.getByRole('button', { name: 'Remover o semestre 1' }));
     window.confirm = original;
     expect(perguntou).toMatch(/Remover o semestre 1/);
-    expect(screen.getByRole('heading', { name: 'Semestre 1 (próximo)' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: '2027.1 (próximo)' })).toBeTruthy();
   });
 });
 

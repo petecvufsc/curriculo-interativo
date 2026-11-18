@@ -4,14 +4,18 @@ import {
   ALTERACOES_2028_1,
   AVISO_FIM_VERSAO_2020_1,
   DATA_FIM_VERSAO_2020_1,
+  PRIMEIRO_SEMESTRE_2028_1,
   VERSAO_REGRAS_PADRAO,
   VERSOES_REGRAS,
   curriculoDaVersao,
   versao2020Disponivel,
   versaoEfetiva,
   versaoRegrasValida,
+  versaoDoSemestre,
   versoesDisponiveis,
 } from './versoes';
+import { registroVazio } from '../aluno';
+import { avaliarPlano, disponiveisNoSemestre, montarPlano, rotuloSemestre } from '../planejamento';
 import { criarMotor } from '../regras';
 import type { Curriculo } from '../tipos';
 
@@ -103,6 +107,40 @@ describe('versões das regras de pré-requisito (decisão D5)', () => {
     expect(versaoEfetiva('2028.1', '2027-10-31')).toBe('2028.1');
     expect(versaoEfetiva('2020.1', '2027-11-01')).toBe('2028.1');
     expect(versaoEfetiva('2028.1', '2030-01-01')).toBe('2028.1');
+  });
+
+  it('versaoDoSemestre: até 2027.2 as regras atuais; de 2028.1 em diante as novas', () => {
+    expect(PRIMEIRO_SEMESTRE_2028_1).toBe('2028.1');
+    for (const s of ['2026.2', '2027.1', '2027.2']) expect(versaoDoSemestre(s)).toBe('2020.1');
+    for (const s of ['2028.1', '2028.2', '2030.1']) expect(versaoDoSemestre(s)).toBe('2028.1');
+    expect(versaoDoSemestre(null)).toBe('2020.1');
+  });
+
+  it('o plano avalia cada semestre com as regras do seu período (ECV2704 em 2027.2 e em 2028.1)', () => {
+    const porSemestre = (k: number) => (versaoDoSemestre(rotuloSemestre('2027.2', k)) === '2028.1' ? motor2028 : motor2020);
+    const plano = (semestres: string[][]) => ({
+      ...registroVazio('ecv-2020-1'),
+      plano: { semestres: semestres.map((codigos) => ({ codigos })) },
+    });
+    const problemas = (r: ReturnType<typeof plano>) => avaliarPlano(porSemestre, r).semestres.flatMap((s) => s.itens.flatMap((i) => i.problemas));
+    // 1º semestre do plano = 2027.2 (regras atuais): sem pré-requisito
+    expect(problemas(plano([['ECV2704']]))).toEqual([]);
+    // 2º semestre = 2028.1 (regras novas): exige as sete da 4ª fase
+    expect(problemas(plano([[], ['ECV2704']]))).toEqual([expect.objectContaining({ tipo: 'requisito' })]);
+    // Com um motor só (como era antes), o resultado não distinguiria os períodos
+    expect(avaliarPlano(motor2020, plano([[], ['ECV2704']])).semestres[1].itens[0].problemas).toEqual([]);
+  });
+
+  it('disponiveisNoSemestre e montarPlano também escolhem as regras pelo semestre', () => {
+    const porSemestre = (k: number) => (k >= 2 ? motor2028 : motor2020);
+    const registro = registroVazio('ecv-2020-1');
+    expect(disponiveisNoSemestre(porSemestre, registro, 1)).toContain('ECV2704');
+    expect(disponiveisNoSemestre(porSemestre, registro, 2)).not.toContain('ECV2704');
+    const r = montarPlano(porSemestre, registro);
+    expect(r.completo).toBe(true);
+    // Nenhuma disciplina do plano montado fica sem os pré-requisitos do semestre em que foi colocada
+    const avaliado = avaliarPlano(porSemestre, { ...registro, plano: { semestres: r.semestres.map((codigos) => ({ codigos })) } });
+    expect(avaliado.semestres.flatMap((s) => s.itens.flatMap((i) => i.problemas))).toEqual([]);
   });
 
   it('o aviso fala do fim da versão 2020.1', () => {

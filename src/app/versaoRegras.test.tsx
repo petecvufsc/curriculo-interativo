@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
-import { CHAVE_LOCAL_STORAGE } from '../dominio/aluno/tipos';
+import { CHAVE_LOCAL_STORAGE, registroVazio } from '../dominio/aluno/tipos';
+import { fixarHoje, registroCom, semear } from './testeAuxiliar';
 
 beforeEach(() => localStorage.clear());
 afterEach(cleanup);
@@ -118,15 +119,63 @@ describe('seletor de versão das regras', () => {
       vi.useRealTimers();
     }
   });
+});
 
-  it('no planejamento, ECV2704 só entra no plano em 2028.1 depois das sete da 4ª fase', async () => {
+describe('planejamento: cada semestre usa as regras do seu período (decisão D5)', () => {
+  beforeEach(() => {
+    fixarHoje();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const primeiroSemestre = () => screen.getByRole('combobox', { name: 'Primeiro semestre do plano' });
+  const sem = (nome: string) => within(screen.getByRole('listitem', { name: new RegExp(`^${nome.replace('.', '\\.')}`) }));
+
+  /** Busca "Expressão" na lista de disciplinas do semestre `n` (rótulo `nome`) e diz se ECV2704 é oferecida. */
+  async function ofereceExpressao(u: ReturnType<typeof userEvent.setup>, nome: string, n: number) {
+    const s = sem(nome);
+    await u.click(s.getByText('+ Adicionar disciplina'));
+    await u.type(s.getByRole('searchbox', { name: `Buscar disciplina para o semestre ${n}` }), 'Expressão');
+    return s.queryByRole('button', { name: `Adicionar Expressão Oral e Escrita ao semestre ${n}` }) !== null;
+  }
+
+  it('Expressão Oral e Escrita (ECV2704) é oferecida em 2027.2 (regras atuais) e não em 2028.1 (novas)', async () => {
     const u = userEvent.setup();
     render(<App />);
-    await u.selectOptions(seletor(), '2028.1');
     await u.click(screen.getByRole('tab', { name: 'Planejamento' }));
+    await u.selectOptions(primeiroSemestre(), '2027.2');
     await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
-    // O semestre 1 sugere só o que já pode ser cursado agora: ECV2704 não aparece entre as opções.
-    await u.type(screen.getByRole('searchbox'), 'Expressão');
-    expect(screen.queryByRole('button', { name: /Expressão Oral e Escrita/ })).toBeNull();
+    await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
+    expect(await ofereceExpressao(u, '2027.2', 1)).toBe(true);
+    expect(await ofereceExpressao(u, '2028.1', 2)).toBe(false);
+  });
+
+  it('avisa a virada: a nota aparece só no primeiro semestre com os novos pré-requisitos', async () => {
+    const u = userEvent.setup();
+    render(<App />);
+    await u.click(screen.getByRole('tab', { name: 'Planejamento' }));
+    await u.selectOptions(primeiroSemestre(), '2027.2');
+    for (let i = 0; i < 3; i++) await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
+    const nota = /A partir daqui valem os novos pré-requisitos/;
+    expect(sem('2027.2').queryByText(nota)).toBeNull();
+    expect(sem('2028.1').getByText(nota)).toBeTruthy();
+    expect(sem('2028.2').queryByText(nota)).toBeNull();
+  });
+
+  it('o mesmo plano com ECV2704: sem problema em 2027.2; "pré-requisito faltando" em 2028.1', () => {
+    const opcoes = { ...registroVazio('x').opcoes, semestreInicial: '2027.2' };
+    semear(registroCom({ opcoes, plano: { semestres: [{ codigos: ['ECV2704'] }] } }));
+    const antes = render(<App />);
+    return userEvent.setup().click(screen.getByRole('tab', { name: 'Planejamento' })).then(() => {
+      expect(screen.queryByText(/pré-requisito faltando/)).toBeNull();
+      antes.unmount();
+      localStorage.clear();
+      semear(registroCom({ opcoes, plano: { semestres: [{ codigos: [] }, { codigos: ['ECV2704'] }] } }));
+      render(<App />);
+      return userEvent.setup().click(screen.getByRole('tab', { name: 'Planejamento' }));
+    }).then(() => {
+      expect(screen.getByText(/1 disciplina com pré-requisito faltando/)).toBeTruthy();
+    });
   });
 });

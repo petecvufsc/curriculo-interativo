@@ -18,9 +18,9 @@ function lerJaViu(): boolean {
 }
 
 export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
-  const { registro, dispatch, motor } = e;
+  const { registro, dispatch, motorDoSemestre } = e;
   const idSugestao = useId();
-  const avaliacao = useMemo(() => avaliarPlano(motor, registro), [motor, registro]);
+  const avaliacao = useMemo(() => avaliarPlano(motorDoSemestre, registro), [motorDoSemestre, registro]);
   const vazio = registro.plano.semestres.length === 0;
   const [jaViu, setJaViu] = useState(lerJaViu);
   useEffect(() => {
@@ -39,7 +39,7 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
 
   const montar = () => {
     if (!vazio && !window.confirm('Substituir o plano atual por um plano montado do zero, até o fim do curso?')) return;
-    const { semestres } = montarPlano(motor, registro);
+    const { semestres } = montarPlano(motorDoSemestre, registro);
     dispatch({ tipo: 'plano', op: { tipo: 'definirPlano', semestres } });
   };
 
@@ -56,8 +56,8 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
           </p>
           <ol>
             <li>
-              Diga <strong>quantas disciplinas</strong> quer por semestre e, se quiser, o nome do primeiro semestre (por
-              exemplo, 2027.1).
+              Diga <strong>quantas disciplinas</strong> quer por semestre e escolha o <strong>primeiro semestre</strong> do
+              plano (por exemplo, 2027.1). Os seguintes são nomeados em sequência.
             </li>
             <li>
               Clique em <strong>Montar plano até o fim</strong> para o app propor todos os semestres até concluir as
@@ -87,7 +87,7 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
           onMudar={(disciplinasPorSemestre) => dispatch({ tipo: 'opcoes', opcoes: { disciplinasPorSemestre } })}
         />
         <PrimeiroSemestre
-          inicial={registro.opcoes.semestreInicial}
+          inicio={e.inicioPlano}
           onMudar={(semestreInicial) => dispatch({ tipo: 'opcoes', opcoes: { semestreInicial } })}
         />
       </div>
@@ -102,7 +102,11 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
           Limpar plano
         </button>
       </div>
-      <ResumoDoPlano avaliacao={avaliacao} semestreInicial={registro.opcoes.semestreInicial} />
+      <p className="muted nota-versao-plano">
+        Cada semestre usa os pré-requisitos do seu período: até 2027.2 valem os atuais e, a partir de 2028.1, os novos
+        (ECV2501, ECV2505, ECV2704 e ECV2932).
+      </p>
+      <ResumoDoPlano avaliacao={avaliacao} semestreInicial={e.inicioPlano} />
       {vazio ? (
         <p className="muted">Nenhum semestre no plano. Use &quot;Montar plano até o fim&quot; ou &quot;+ Adicionar semestre&quot; para começar.</p>
       ) : (

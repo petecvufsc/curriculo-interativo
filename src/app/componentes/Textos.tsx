@@ -74,7 +74,9 @@ export function TextoAjuda() {
       <p>
         No seletor &quot;Regras de pré-requisitos&quot;, a versão <strong>2020.1</strong> usa os pré-requisitos atuais e a
         versão <strong>2028.1</strong> usa os novos, que valem a partir de 2028.1 (ECV2501, ECV2505, ECV2704 e ECV2932).
-        Trocar de versão não apaga nada do seu histórico: só muda o que fica disponível e o que o plano acusa como falta
+        No <strong>Planejamento</strong>, a escolha não vale: cada semestre usa os pré-requisitos do seu período (até
+        2027.2 os atuais; de 2028.1 em diante os novos), por isso o primeiro semestre do plano é obrigatório. Trocar de
+        versão não apaga nada do seu histórico: só muda o que fica disponível e o que o plano acusa como falta
         de pré-requisito. A partir de novembro de 2027, a versão 2020.1 deixa de ser oferecida (isso acontece sozinho, pela data do
         aparelho) e apenas a versão 2028.1 estará disponível.
       </p>

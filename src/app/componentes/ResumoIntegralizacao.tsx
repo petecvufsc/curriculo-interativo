@@ -8,13 +8,13 @@ import type { EstadoAluno } from '../estado/useEstadoAluno';
  * Na aba Planejamento, mostra também quanto terá ao fim do plano (a parte clara da barra).
  */
 export function ResumoIntegralizacao({ e }: { e: EstadoAluno }) {
-  const { motor } = e;
+  const { motorDoSemestre } = e;
   const hoje = e.progresso.geral;
   const noPlano = e.aba === 'planejamento';
   const temPlano = e.registro.plano.semestres.length > 0;
   const projetado = useMemo(
-    () => (noPlano && temPlano ? avaliarPlano(motor, e.registro).progressoProjetado.geral : null),
-    [motor, noPlano, temPlano, e.registro],
+    () => (noPlano && temPlano ? avaliarPlano(motorDoSemestre, e.registro).progressoProjetado.geral : null),
+    [motorDoSemestre, noPlano, temPlano, e.registro],
   );
   if (hoje.percentual === null || hoje.totalHA === null) return null;
 

@@ -3,6 +3,7 @@ import type { RegistroAluno } from '../aluno';
 import type { Motor } from '../regras';
 import { aulasNoLimite } from './aulasNoLimite';
 import { baseDoSemestre } from './baseSemestre';
+import { motorEm, type MotorDoPlano } from './motorPorSemestre';
 
 /**
  * Impacto de uma disciplina (§11): quantas outras do currículo ela libera, direta ou indiretamente
@@ -50,7 +51,8 @@ export function sugerirSemestre(
  * atendidos com `base(k)`, não cumpridos em `base(k)` e ainda não planejados em nenhum semestre.
  * Inclui optativas. Ordem do currículo. Não altera o registro.
  */
-export function disponiveisNoSemestre(motor: Motor, registro: RegistroAluno, k: number): string[] {
+export function disponiveisNoSemestre(motorDoPlano: MotorDoPlano, registro: RegistroAluno, k: number): string[] {
+  const motor = motorEm(motorDoPlano, k);
   const planejadas = new Set(registro.plano.semestres.flatMap((s) => s.codigos));
   return motor
     .simular(baseDoSemestre(motor, registro, k))

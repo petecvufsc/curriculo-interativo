@@ -4,7 +4,9 @@ export { avaliarPlano } from './avaliarPlano';
 export { baseDoSemestre } from './baseSemestre';
 export { LIMITE_SEMESTRES_PADRAO, montarPlano } from './montarPlano';
 export type { ResultadoMontagem } from './montarPlano';
-export { proximoSemestreSugerido, rotuloSemestre, semestreValido } from './rotuloSemestre';
+export { motorEm } from './motorPorSemestre';
+export type { MotorDoPlano } from './motorPorSemestre';
+export { opcoesDeInicio, proximoSemestreSugerido, rotuloSemestre, semestreValido, somarSemestres } from './rotuloSemestre';
 export { disponiveisNoSemestre, impactoDe, sugerirSemestre } from './sugerirSemestre';
 export type {
   AvaliacaoPlano,

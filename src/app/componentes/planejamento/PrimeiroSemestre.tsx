@@ -1,41 +1,41 @@
-import { useEffect, useId, useState } from 'react';
-import { proximoSemestreSugerido, semestreValido } from '../../../dominio/planejamento';
+import { useId, useMemo } from 'react';
+import { opcoesDeInicio, semestreValido, somarSemestres } from '../../../dominio/planejamento';
 
 interface Props {
-  inicial: string | null;
-  onMudar: (inicial: string | null) => void;
+  /** Primeiro semestre do plano (sempre existe: sem escolha, o próximo do calendário). */
+  inicio: string;
+  onMudar: (inicio: string) => void;
 }
 
-/** Nome do primeiro semestre do plano ("2027.1"). Vazio = semestres sem nome real. */
-export function PrimeiroSemestre({ inicial, onMudar }: Props) {
+/**
+ * Primeiro semestre do plano, obrigatório e no formato AAAA.1 ou AAAA.2. O nome não é digitado: escolhe-se numa
+ * lista, e os semestres seguintes são nomeados em sequência (2027.2, 2028.1…). O nome importa: define quais
+ * pré-requisitos valem em cada semestre (decisão D5).
+ */
+export function PrimeiroSemestre({ inicio, onMudar }: Props) {
   const id = useId();
-  const [texto, setTexto] = useState(inicial ?? '');
-  useEffect(() => setTexto(inicial ?? ''), [inicial]);
-  const invalido = texto.trim() !== '' && !semestreValido(texto.trim());
-  const exemplo = proximoSemestreSugerido(new Date());
+  const opcoes = useMemo(() => opcoesDeInicio(new Date(), inicio), [inicio]);
+  const segundo = somarSemestres(inicio, 1);
   return (
     <div className="quantidade">
-      <label htmlFor={id}>Primeiro semestre do plano (opcional)</label>
-      <input
+      <label htmlFor={id}>Primeiro semestre do plano</label>
+      <select
         id={id}
-        className="campo campo-numero"
-        type="text"
-        inputMode="decimal"
-        placeholder={`Ex.: ${exemplo}`}
-        maxLength={6}
-        value={texto}
-        aria-invalid={invalido}
+        className="campo"
+        value={inicio}
         aria-describedby={`${id}-ajuda`}
         onChange={(ev) => {
-          const v = ev.target.value.trim();
-          setTexto(ev.target.value);
-          if (v === '') onMudar(null);
-          else if (semestreValido(v)) onMudar(v);
+          if (semestreValido(ev.target.value)) onMudar(ev.target.value);
         }}
-        onBlur={() => setTexto(inicial ?? '')}
-      />
-      <span id={`${id}-ajuda`} className={invalido ? 'erro-texto' : 'muted quantidade-ajuda'}>
-        {invalido ? 'Use o formato AAAA.1 ou AAAA.2, por exemplo 2027.1.' : `Dá nome aos semestres do plano (${exemplo}, depois o seguinte…).`}
+      >
+        {opcoes.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+      <span id={`${id}-ajuda`} className="muted quantidade-ajuda">
+        Os semestres seguintes são nomeados em sequência ({inicio}, {segundo}…). Cada um usa os pré-requisitos do seu período.
       </span>
     </div>
   );

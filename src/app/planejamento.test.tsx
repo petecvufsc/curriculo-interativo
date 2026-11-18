@@ -3,12 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
-import { sugerirSemestre } from '../dominio/planejamento';
+import { somarSemestres, sugerirSemestre } from '../dominio/planejamento';
 import { curriculo, motor, porCodigo } from './estado/motorEcv';
-import { cartao, registroCom, semear } from './testeAuxiliar';
+import { cartao, fixarHoje, registroCom, semear } from './testeAuxiliar';
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  fixarHoje();
+});
 afterEach(() => {
+  vi.useRealTimers();
   cleanup();
   localStorage.clear();
   vi.restoreAllMocks();
@@ -16,7 +20,7 @@ afterEach(() => {
 
 type U = ReturnType<typeof userEvent.setup>;
 const abrirPlanejamento = (u: U) => u.click(screen.getByRole('tab', { name: 'Planejamento' }));
-const semestre = (n: number) => screen.getByRole('listitem', { name: new RegExp(`^Semestre ${n}`) });
+const semestre = (n: number) => screen.getByRole('listitem', { name: new RegExp(`^${somarSemestres('2027.1', n - 1)}`) });
 const adicionarSemestre = (u: U) => u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
 /** Abre a busca do semestre, procura pelo código e clica na opção (nome acessível: "Adicionar <nome> ao semestre n"). */
 async function adicionar(u: U, n: number, codigo: string) {
@@ -60,7 +64,7 @@ describe('planejamento', () => {
     expect(screen.queryByText(/Sugestão automática: as disciplinas que mais liberam outras do curso/)).toBeNull();
     await adicionarSemestre(u);
     expect(screen.getByText(/Sugestão automática: as disciplinas que mais liberam outras do curso/)).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Semestre 1 (próximo)' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: '2027.1 (próximo)' })).toBeTruthy();
     await adicionar(u, 1, 'MTM3110');
     const s1 = within(semestre(1));
     expect(s1.getByText('Cálculo 1')).toBeTruthy();
@@ -230,10 +234,10 @@ describe('planejamento', () => {
     expect(screen.getByRole('progressbar', { name: 'Integralização do curso' }).getAttribute('aria-valuetext')).toMatch(/1,6% ao fim do plano/);
 
     await u.click(screen.getByRole('button', { name: 'Limpar plano' }));
-    expect(screen.queryByText('Semestre 1 (próximo)')).not.toBeNull(); // cancelado
+    expect(screen.queryByText('2027.1 (próximo)')).not.toBeNull(); // cancelado
     await u.click(screen.getByRole('button', { name: 'Limpar plano' }));
     expect(confirmar).toHaveBeenCalledTimes(2);
-    expect(screen.queryByText('Semestre 1 (próximo)')).toBeNull();
+    expect(screen.queryByText('2027.1 (próximo)')).toBeNull();
   });
 });
 

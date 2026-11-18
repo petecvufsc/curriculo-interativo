@@ -32,6 +32,9 @@
 .semestre h3 { font-size: 1.125rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .semestre-acoes { display: flex; flex-wrap: wrap; gap: 6px; }
 .semestre-total { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+/* Virada dos pré-requisitos (2028.1): aviso na coluna do primeiro semestre afetado */
+.semestre-virada { font-size: 0.875rem; padding: 4px 8px; border-left: 4px solid var(--alerta-borda); background: var(--alerta-tinta); color: var(--texto); border-radius: 0 3px 3px 0; }
+.nota-versao-plano { font-size: 0.9375rem; }
 .semestre-vazio { font-size: 0.9375rem; }
 
 /* Medidor de créditos (marcas em 16 e 30) */

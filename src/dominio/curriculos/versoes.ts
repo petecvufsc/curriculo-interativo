@@ -49,6 +49,18 @@ export const ALTERACOES_2028_1: readonly AlteracaoPreRequisitos[] = [
  */
 export const DATA_FIM_VERSAO_2020_1 = '2027-11-01';
 
+/** Primeiro semestre letivo em que valem os novos pré-requisitos (decisão da Coordenação: adiado de 2027.1 para 2028.1). */
+export const PRIMEIRO_SEMESTRE_2028_1 = '2028.1';
+
+/**
+ * Regras que valem num semestre letivo ("AAAA.1" ou "AAAA.2"): até 2027.2, as atuais (2020.1); de 2028.1 em diante,
+ * as novas (2028.1). Serve ao planejamento, em que cada semestre usa as regras do seu próprio período.
+ * Comparação de texto: com o formato AAAA.S a ordem alfabética é a ordem do tempo.
+ */
+export function versaoDoSemestre(nome: string | null): VersaoRegras {
+  return nome !== null && nome >= PRIMEIRO_SEMESTRE_2028_1 ? '2028.1' : '2020.1';
+}
+
 /** Aviso mostrado enquanto a versão 2020.1 ainda existe. */
 export const AVISO_FIM_VERSAO_2020_1 =
   'A partir de novembro de 2027, apenas a versão 2028.1 estará disponível neste site.';

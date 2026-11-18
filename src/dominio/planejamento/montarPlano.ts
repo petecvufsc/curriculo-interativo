@@ -1,6 +1,6 @@
 // Montagem automática do plano até o fim do curso (docs/regras-de-negocio.md §11).
 import { baseSimulacao, type RegistroAluno } from '../aluno';
-import type { Motor } from '../regras';
+import { motorEm, type MotorDoPlano } from './motorPorSemestre';
 import { sugerirSemestre } from './sugerirSemestre';
 
 export interface ResultadoMontagem {
@@ -26,10 +26,12 @@ export const LIMITE_SEMESTRES_PADRAO = 15;
  * decisão é do aluno. Não considera horários nem a oferta de turmas.
  */
 export function montarPlano(
-  motor: Motor,
+  motorDoPlano: MotorDoPlano,
   registro: RegistroAluno,
   limiteSemestres: number = LIMITE_SEMESTRES_PADRAO,
 ): ResultadoMontagem {
+  // As disciplinas e o que conta como cumprido são os mesmos em todas as versões; só os pré-requisitos mudam por semestre.
+  const motor = motorEm(motorDoPlano, 1);
   const obrigatorias = motor.curriculo.disciplinas.filter((d) => d.tipo === 'obrigatoria').map((d) => d.codigo);
   const base = baseSimulacao(registro);
   const semestres: string[][] = [];
@@ -37,7 +39,7 @@ export function montarPlano(
 
   while (semestres.length < limiteSemestres && faltam().length > 0) {
     const { limiteAulas, disciplinasPorSemestre } = registro.opcoes;
-    const semestre = sugerirSemestre(motor, base, limiteAulas, disciplinasPorSemestre);
+    const semestre = sugerirSemestre(motorEm(motorDoPlano, semestres.length + 1), base, limiteAulas, disciplinasPorSemestre);
     if (semestre.length === 0) break; // nada mais disponível ou cabível: evita laço infinito
     semestres.push(semestre);
     for (const c of semestre) base.add(c);

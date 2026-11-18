@@ -5,13 +5,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { montarPlano } from '../dominio/planejamento';
+import { motorDoSemestreDe } from './estado/motorEcv';
 import { registroVazio } from '../dominio/aluno';
 import { App } from './App';
 import { curriculo, motor } from './estado/motorEcv';
-import { registroCom, semear } from './testeAuxiliar';
+import { fixarHoje, registroCom, semear } from './testeAuxiliar';
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  fixarHoje();
+});
 afterEach(() => {
+  vi.useRealTimers();
   cleanup();
   localStorage.clear();
   vi.restoreAllMocks();
@@ -29,7 +34,7 @@ describe('montar plano até o fim', () => {
     render(<App />);
     await abrirPlanejamento(u);
     await montar(u);
-    const esperado = montarPlano(motor, registroVazio('ecv-2020-1')).semestres.length;
+    const esperado = montarPlano(motorDoSemestreDe('2027.1'), registroVazio('ecv-2020-1')).semestres.length;
     expect(esperado).toBeGreaterThan(8);
     expect(semestres()).toHaveLength(esperado);
     const resumo = within(situacao());
@@ -55,7 +60,7 @@ describe('montar plano até o fim', () => {
     await u.clear(campo);
     await u.type(campo, '8');
     await montar(u);
-    const esperado = montarPlano(motor, { ...registroVazio('ecv-2020-1'), opcoes: { ...registroVazio('x').opcoes, disciplinasPorSemestre: 8 } });
+    const esperado = montarPlano(motorDoSemestreDe('2027.1'), { ...registroVazio('ecv-2020-1'), opcoes: { ...registroVazio('x').opcoes, disciplinasPorSemestre: 8 } });
     expect(semestres()).toHaveLength(esperado.semestres.length);
     for (const s of semestres()) {
       expect(within(s).queryAllByRole('button', { name: /^Remover .* do semestre \d+$/ }).length).toBeLessThanOrEqual(8);
@@ -90,51 +95,61 @@ describe('montar plano até o fim', () => {
   });
 });
 
-describe('nome real dos semestres', () => {
-  it('"2027.1" dá nome aos semestres: 2027.1 (próximo), 2027.2, 2028.1…', async () => {
+describe('nome dos semestres (obrigatório, AAAA.1 / AAAA.2)', () => {
+  const primeiroSemestre = () => screen.getByRole('combobox', { name: 'Primeiro semestre do plano' }) as HTMLSelectElement;
+
+  it('sem escolha, o primeiro semestre é o próximo do calendário (2027.1) e os seguintes seguem em sequência', async () => {
     const u = userEvent.setup();
     render(<App />);
     await abrirPlanejamento(u);
-    await u.type(screen.getByLabelText('Primeiro semestre do plano (opcional)'), '2027.1');
+    expect(primeiroSemestre().value).toBe('2027.1');
     for (let i = 0; i < 3; i++) await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
     expect(screen.getByRole('heading', { name: '2027.1 (próximo)' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: '2027.2' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: '2028.1' })).toBeTruthy();
-    // os botões mantêm o número e acrescentam o nome real
-    expect(screen.getByRole('button', { name: 'Remover o semestre 3 (2028.1)' })).toBeTruthy();
+    // os botões e as perguntas de confirmação usam o número do semestre
+    expect(screen.getByRole('button', { name: 'Remover o semestre 3' })).toBeTruthy();
     expect(within(situacao()).getByText(/\(2027\.1 a 2028\.1\)/)).toBeTruthy();
   });
 
-  it('sem nome, continua "Semestre 1 (próximo)"', async () => {
+  it('o nome não é livre: só há opções AAAA.1 e AAAA.2 numa lista, sem campo de texto', async () => {
     const u = userEvent.setup();
     render(<App />);
     await abrirPlanejamento(u);
-    await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
-    expect(screen.getByRole('heading', { name: 'Semestre 1 (próximo)' })).toBeTruthy();
+    const opcoes = within(primeiroSemestre()).getAllByRole('option').map((o) => o.textContent);
+    expect(opcoes.length).toBeGreaterThan(5);
+    for (const o of opcoes) expect(o).toMatch(/^\d{4}\.[12]$/);
+    expect(opcoes).toContain('2027.1');
+    expect(screen.queryByLabelText('Primeiro semestre do plano (opcional)')).toBeNull();
   });
 
-  it('formato inválido mostra o erro e não muda os nomes', async () => {
+  it('trocar o primeiro semestre renomeia todos; a escolha fica salva', async () => {
     const u = userEvent.setup();
+    const { unmount } = render(<App />);
+    await abrirPlanejamento(u);
+    for (let i = 0; i < 3; i++) await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
+    await u.selectOptions(primeiroSemestre(), '2027.2');
+    expect(screen.getByRole('heading', { name: '2027.2 (próximo)' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: '2028.1' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: '2028.2' })).toBeTruthy();
+    unmount();
     render(<App />);
     await abrirPlanejamento(u);
-    await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
-    const campo = screen.getByLabelText('Primeiro semestre do plano (opcional)') as HTMLInputElement;
-    await u.type(campo, '2027.3');
-    expect(screen.getByText('Use o formato AAAA.1 ou AAAA.2, por exemplo 2027.1.')).toBeTruthy();
-    expect(campo.getAttribute('aria-invalid')).toBe('true');
-    expect(screen.getByRole('heading', { name: 'Semestre 1 (próximo)' })).toBeTruthy();
+    expect(primeiroSemestre().value).toBe('2027.2');
   });
 
-  it('apagar o campo volta aos nomes por número', async () => {
+  it('o nome fixado ao montar o plano não "anda" com o calendário depois', async () => {
     const u = userEvent.setup();
-    render(<App />);
+    const { unmount } = render(<App />);
     await abrirPlanejamento(u);
     await u.click(screen.getByRole('button', { name: '+ Adicionar semestre' }));
-    const campo = screen.getByLabelText('Primeiro semestre do plano (opcional)');
-    await u.type(campo, '2027.1');
+    unmount();
+    // Meses depois (agosto de 2027), o próximo do calendário seria 2028.1, mas o plano continua em 2027.1
+    vi.setSystemTime(new Date('2027-08-10T12:00:00'));
+    render(<App />);
+    await abrirPlanejamento(u);
+    expect(primeiroSemestre().value).toBe('2027.1');
     expect(screen.getByRole('heading', { name: '2027.1 (próximo)' })).toBeTruthy();
-    await u.clear(campo);
-    expect(screen.getByRole('heading', { name: 'Semestre 1 (próximo)' })).toBeTruthy();
   });
 });
 
@@ -222,7 +237,7 @@ describe('estágio fora do limite de créditos', () => {
     semear(registroCom({ status: ate9, plano: { semestres: [{ codigos: ['ECV2000', 'ECV2002'] }] } }));
     render(<App />);
     await abrirPlanejamento(u);
-    const sem = within(screen.getByRole('listitem', { name: /^Semestre 1/ }));
+    const sem = within(screen.getByRole('listitem', { name: /^2027\.1/ }));
     expect(sem.getByText('4 créditos · 612 h-a')).toBeTruthy(); // 540 h-a do estágio + 72 do TCC II
     expect(sem.getByText(/ECV2000 · não conta nos créditos/)).toBeTruthy();
     expect(sem.getByRole('meter').getAttribute('aria-valuenow')).toBe('4');

@@ -3,7 +3,7 @@ import { aprovadasDe, baseSimulacao, type OpcoesAluno, type RegistroAluno, type 
 import { calcularDestaques } from './destaques';
 import type { Aviso } from './arquivo';
 import { mensagemAlternar, mensagemFase, mensagemStatus } from './mensagens';
-import { motorDe, versaoDoRegistro } from './motorEcv';
+import { inicioDoPlano, motorDe, motorDoSemestreDe, versaoDoRegistro } from './motorEcv';
 import { aplicarFase, definir, limparStatus, mudarOpcoes } from './operacoesRegistro';
 import { aplicarPlano, semestresPlanejados, type OperacaoPlano } from './operacoesPlano';
 import { lerRegistroSalvo, usePersistencia } from './persistencia';
@@ -93,7 +93,8 @@ function reducerBase(e: Estado, a: Acao): Estado {
     case 'opcoes':
       return { ...e, registro: mudarOpcoes(r, a.opcoes) };
     case 'plano':
-      return { ...e, registro: aplicarPlano(r, a.op) };
+      // O primeiro semestre é obrigatório: ao mexer no plano, fixa o do calendário se ainda não houver (não "anda" depois).
+      return { ...e, registro: aplicarPlano(r.opcoes.semestreInicial ? r : mudarOpcoes(r, { semestreInicial: inicioDoPlano(null) }), a.op) };
     case 'aba':
       return { ...e, aba: a.aba };
     case 'importar':
@@ -118,13 +119,17 @@ export function useEstadoAluno() {
   // Regras de pré-requisito da versão escolhida (2020.1 ou 2028.1): tudo abaixo é recalculado ao trocar.
   const versao = versaoDoRegistro(registro.opcoes.versaoRegras);
   const motor = motorDe(versao);
+  // Primeiro semestre do plano: sempre existe (sem escolha, o próximo do calendário). Cada semestre do plano usa as
+  // regras do seu período: até 2027.2 as atuais, de 2028.1 em diante as novas (decisão D5).
+  const inicioPlano = inicioDoPlano(registro.opcoes.semestreInicial);
+  const motorDoSemestre = useMemo(() => motorDoSemestreDe(inicioPlano), [inicioPlano]);
   const destaques = useMemo(
     () => calcularDestaques(motor, estado.modo, estado.selecionada, base),
     [motor, estado.modo, estado.selecionada, base],
   );
   const simulacao = useMemo(() => motor.simular(base), [motor, base]);
   const progresso = useMemo(() => motor.progresso(base), [motor, base]);
-  return { ...estado, versao, motor, aprovadas, base, planejadas, destaques, simulacao, progresso, dispatch };
+  return { ...estado, versao, motor, inicioPlano, motorDoSemestre, aprovadas, base, planejadas, destaques, simulacao, progresso, dispatch };
 }
 
 export type EstadoAluno = ReturnType<typeof useEstadoAluno>;

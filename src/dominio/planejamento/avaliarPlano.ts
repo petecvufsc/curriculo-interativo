@@ -3,6 +3,7 @@ import { disciplinaDe, type RegistroAluno } from '../aluno';
 import type { Motor } from '../regras';
 import { aulasNoLimite } from './aulasNoLimite';
 import { baseDoSemestre } from './baseSemestre';
+import { motorEm, type MotorDoPlano } from './motorPorSemestre';
 import type { AvaliacaoPlano, AvisoSemestre, ItemPlano, ProblemaItem, SemestreAvaliado } from './tipos';
 
 /** Problemas de `codigo` no semestre cuja base é `base`; `vistos` = códigos já listados antes no plano (§11). */
@@ -44,9 +45,11 @@ function avisosDe(motor: Motor, totalAulas: number, quantidade: number, temForaD
  * seguintes recebem 'repetida'. Uma disciplina cumprida não recebe 'requisito' (os requisitos
  * deixam de importar), e 'ja-cumprida' não se soma a 'repetida'.
  */
-export function avaliarPlano(motor: Motor, registro: RegistroAluno): AvaliacaoPlano {
+export function avaliarPlano(motorDoPlano: MotorDoPlano, registro: RegistroAluno): AvaliacaoPlano {
   const vistos = new Set<string>();
   const semestres: SemestreAvaliado[] = registro.plano.semestres.map((semestre, i) => {
+    // Cada semestre é avaliado com as regras que valem nele (decisão D5).
+    const motor = motorEm(motorDoPlano, i + 1);
     const base = baseDoSemestre(motor, registro, i + 1);
     const itens: ItemPlano[] = [];
     let totalAulas = 0;
@@ -65,6 +68,7 @@ export function avaliarPlano(motor: Motor, registro: RegistroAluno): AvaliacaoPl
     }
     return { numero: i + 1, itens, totalAulas, totalHorasAula, avisos: avisosDe(motor, totalAulas, quantidade, temForaDoLimite) };
   });
-  const tudo = baseDoSemestre(motor, registro, registro.plano.semestres.length + 1);
-  return { semestres, progressoProjetado: motor.progresso(tudo) };
+  const ultimo = motorEm(motorDoPlano, registro.plano.semestres.length + 1);
+  const tudo = baseDoSemestre(ultimo, registro, registro.plano.semestres.length + 1);
+  return { semestres, progressoProjetado: ultimo.progresso(tudo) };
 }

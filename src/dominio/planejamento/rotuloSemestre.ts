@@ -18,6 +18,25 @@ export function rotuloSemestre(inicial: string | null, k: number): string | null
   return `${Math.floor(indice / 2)}.${(indice % 2) + 1}`;
 }
 
+/** Semestre `delta` semestres depois (ou antes, se negativo) de `nome`: somarSemestres("2027.2", 1) = "2028.1". Nome inválido: `null`. */
+export function somarSemestres(nome: string, delta: number): string | null {
+  const m = FORMATO.exec(nome);
+  if (!m) return null;
+  const indice = Number(m[1]) * 2 + (Number(m[2]) - 1) + delta;
+  return `${Math.floor(indice / 2)}.${(indice % 2) + 1}`;
+}
+
+/**
+ * Opções do "primeiro semestre do plano": do semestre anterior ao próximo sugerido até 8 depois (cerca de quatro
+ * anos), em ordem. O valor já escolhido entra na lista mesmo que fique fora dessa faixa. O nome não é livre: só AAAA.1 e AAAA.2.
+ */
+export function opcoesDeInicio(hoje: Date, atual: string | null): string[] {
+  const proximo = proximoSemestreSugerido(hoje);
+  const lista = Array.from({ length: 10 }, (_, i) => somarSemestres(proximo, i - 1) as string);
+  if (atual && semestreValido(atual) && !lista.includes(atual)) lista.push(atual);
+  return lista.sort();
+}
+
 /**
  * Próximo semestre letivo a partir de uma data, para sugerir o início do plano: até junho o "próximo" é
  * o segundo semestre do ano; de julho em diante, o primeiro do ano seguinte. É só uma sugestão: o
