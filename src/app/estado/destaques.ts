@@ -1,4 +1,4 @@
-import { motor } from './motorEcv';
+import type { Motor } from '../../dominio/regras';
 import type { Modo } from './useEstadoAluno';
 
 export type TipoDestaque =
@@ -26,6 +26,7 @@ export interface Destaque {
 
 /** Mapa código → destaque visual, derivado do modo atual (nunca reimplementa regras: só consulta o motor). */
 export function calcularDestaques(
+  motor: Motor,
   modo: Modo,
   selecionada: string | null,
   aprovadas: ReadonlySet<string>,

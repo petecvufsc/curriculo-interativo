@@ -1,9 +1,11 @@
 import { useId, useMemo, useState } from 'react';
 import { impactoDe } from '../../../dominio/planejamento';
 import { textoCreditos } from '../../estado/creditos';
-import { motor, porCodigo } from '../../estado/motorEcv';
+import type { Motor } from '../../../dominio/regras';
+import { porCodigo } from '../../estado/motorEcv';
 
 interface Props {
+  motor: Motor;
   /** "semestre 2" ou "semestre 2 (2027.2)": usado nos nomes acessíveis. */
   nomeSemestre: string;
   /** Códigos que podem ser adicionados (vindos de `disponiveisNoSemestre`). */
@@ -30,7 +32,7 @@ interface Opcao {
  * Busca de disciplina para o semestre. Sem texto, mostra as que mais liberam outras do curso; com texto,
  * filtra por nome ou código. As obrigatórias vêm antes das optativas.
  */
-export function AdicionarDisciplina({ nomeSemestre, codigos, onAdicionar }: Props) {
+export function AdicionarDisciplina({ motor, nomeSemestre, codigos, onAdicionar }: Props) {
   const id = useId();
   const [busca, setBusca] = useState('');
 
@@ -52,7 +54,7 @@ export function AdicionarDisciplina({ nomeSemestre, codigos, onAdicionar }: Prop
       (a, b) =>
         Number(a.optativa) - Number(b.optativa) || b.libera - a.libera || a.fase - b.fase || a.nome.localeCompare(b.nome, 'pt-BR'),
     );
-  }, [codigos]);
+  }, [motor, codigos]);
 
   const termo = normalizar(busca.trim());
   const filtradas = termo ? opcoes.filter((o) => normalizar(`${o.nome} ${o.codigo}`).includes(termo)) : opcoes;

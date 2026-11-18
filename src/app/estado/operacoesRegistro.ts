@@ -1,12 +1,16 @@
 import { aprovadasDe, definirStatus, type OpcoesAluno, type RegistroAluno, type StatusEditavel } from '../../dominio/aluno';
-import { motor, porCodigo } from './motorEcv';
+import { motorDe, porCodigo } from './motorEcv';
+
+/** Motor da versão de regras escolhida no registro (2020.1 ou 2028.1). */
+export const motorDoRegistro = (registro: RegistroAluno) => motorDe(registro.opcoes.versaoRegras);
 
 export function definir(registro: RegistroAluno, codigo: string, status: StatusEditavel): RegistroAluno {
-  return definirStatus(motor, registro, codigo, status);
+  return definirStatus(motorDoRegistro(registro), registro, codigo, status);
 }
 
 /** Checkbox da fase: aplica `motor.marcarFase` e traduz a diferença em mudanças de status (com cascata). */
 export function aplicarFase(registro: RegistroAluno, fase: number, marcada: boolean): RegistroAluno {
+  const motor = motorDoRegistro(registro);
   const antes = aprovadasDe(registro);
   const depois = motor.marcarFase(antes, fase, marcada);
   let novo = registro;

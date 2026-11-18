@@ -130,6 +130,12 @@ Cada disciplina é adicionada enquanto houver menos de `quantidade` (opção do 
 - Até a versão anterior a ordem era "menor fase primeiro". Mudou a pedido do usuário: o que mais "destranca" o curso vem antes, mesmo de fase maior.
 - **Montar o plano até o fim** (`montarPlano`): repete a sugestão semestre a semestre, a partir do histórico, até cobrir todas as obrigatórias. O que entra em um semestre conta como cumprido para os seguintes. Para quando as obrigatórias acabam, quando nada mais cabe, ou em 15 semestres (duração máxima do curso no PDF). Devolve `completo` e as `faltantes`. Ignora o plano atual (a interface pede confirmação antes de substituí-lo). Não escolhe optativas: faltam 432 h-a, e a escolha é do aluno. De um histórico vazio, com 7 disciplinas por semestre, cobre as 62 obrigatórias, com o estágio no mesmo semestre do TCC II e de outras disciplinas (ver "Estágio" abaixo). Com 1 por semestre não cabe em 15 semestres, e o resultado informa o que ficou de fora.
 - **Estágio fora do limite de créditos** [DECISÃO D3, informada pelo usuário]: o PDF dá ao estágio (ECV2000) 30 aulas semanais, equivalentes às 540 h-a, mas ele é feito fora da sala de aula e os alunos o cursam junto com o TCC II e, às vezes, com uma optativa. Por isso a disciplina tem `foraDoLimiteDeAulas: true`: suas 30 aulas **não entram** na soma de créditos do semestre (16 a 30), nem na sugestão (`sugerirSemestre`), e semestre com estágio **não gera aviso de "abaixo do mínimo"**. As **horas-aula** (540) continuam somando nas horas do semestre e na integralização. O aviso de "acima do máximo" continua valendo para as demais disciplinas.
+- **Versão das regras de pré-requisito** (`opcoes.versaoRegras`, decisão D5): `"2020.1"` (padrão; pré-requisitos atuais, até 2027.2) ou `"2028.1"` (novos, a partir de 2028.1). Só quatro disciplinas diferem (fonte: comunicado oficial da Coordenação, via CALEC, 18/11/2026):
+  - ECV2501: INE5108 → INE5108 e ECV2302.
+  - ECV2505: ECV2401 e ECV2404 → ECV2401, ECV2404 e MTM3131.
+  - ECV2932: ECV2405 → ECV2603.
+  - ECV2704: sem pré-requisito → as sete obrigatórias da 4ª fase (ECV2401, ECV2402, ECV2403, ECV2404, ECV2405, ENS5101, MTM3103).
+  A escolha vale para a grade, a simulação e o planejamento inteiros; não há regra de transição por semestre. Ausente ou inválido volta a 2020.1.
 - **Nome real do semestre** (`opcoes.semestreInicial`, "AAAA.1" ou "AAAA.2"): o semestre `k` do plano recebe o nome contado de meio em meio ano (2027.1, 2027.2, 2028.1…). É só um rótulo: não muda nenhuma regra. Sem valor, os semestres seguem como "Semestre 1 (próximo)", "Semestre 2"…
 - **A sugestão não verifica conflito de horário nem a oferta do semestre.** O currículo (PDF) não traz horários de turma, e sem esses dados é impossível garantir que não há conflito. A interface avisa isso na nota da sugestão.
 
@@ -143,7 +149,7 @@ Cada disciplina é adicionada enquanto houver menos de `quantidade` (opção do 
   "atualizadoEm": "2026-11-11T15:00:00.000Z",
   "status": { "ECV2101": "aprovada", "MTM3101": "aprovada", "FSC5002": "cursando", "MTM3120": "reprovada" },
   "plano": { "semestres": [ { "codigos": ["ECV2201", "FSC5122"] } ] },
-  "opcoes": { "cursandoComoAprovada": true, "limiteAulas": 30, "disciplinasPorSemestre": 5, "semestreInicial": "2027.1" }
+  "opcoes": { "cursandoComoAprovada": true, "limiteAulas": 30, "disciplinasPorSemestre": 5, "semestreInicial": "2027.1", "versaoRegras": "2020.1" }
 }
 ```
 

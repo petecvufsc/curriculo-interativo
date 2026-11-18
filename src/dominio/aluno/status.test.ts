@@ -17,7 +17,7 @@ describe('registroVazio (§12)', () => {
       atualizadoEm: DATA_FIXA,
       status: {},
       plano: { semestres: [] },
-      opcoes: { cursandoComoAprovada: true, limiteAulas: 30, disciplinasPorSemestre: 5, semestreInicial: null },
+      opcoes: { cursandoComoAprovada: true, limiteAulas: 30, disciplinasPorSemestre: 5, semestreInicial: null, versaoRegras: '2020.1' },
     });
   });
 });

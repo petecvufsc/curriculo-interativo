@@ -1,4 +1,5 @@
 // Auxiliares de teste para o registro do aluno (currículo fictício, id "teste").
+import type { VersaoRegras } from '../curriculos/versoes';
 import { registroVazio, type RegistroAluno, type StatusDisciplina } from './tipos';
 
 export interface ParcialRegistro {
@@ -9,6 +10,7 @@ export interface ParcialRegistro {
   limiteAulas?: number;
   disciplinasPorSemestre?: number;
   semestreInicial?: string | null;
+  versaoRegras?: VersaoRegras;
 }
 
 export const DATA_FIXA = '2026-01-01T00:00:00.000Z';
@@ -24,6 +26,7 @@ export function reg(p: ParcialRegistro = {}, curriculoId = 'teste'): RegistroAlu
       limiteAulas: p.limiteAulas ?? base.opcoes.limiteAulas,
       disciplinasPorSemestre: p.disciplinasPorSemestre ?? base.opcoes.disciplinasPorSemestre,
       semestreInicial: p.semestreInicial ?? base.opcoes.semestreInicial,
+      versaoRegras: p.versaoRegras ?? base.opcoes.versaoRegras,
     },
   };
 }

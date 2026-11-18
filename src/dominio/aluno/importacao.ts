@@ -1,5 +1,6 @@
 // Importação validada do registro (docs/regras-de-negocio.md §12). Funções puras.
 import type { Curriculo } from '../tipos';
+import { VERSAO_REGRAS_PADRAO, versaoRegrasValida, type VersaoRegras } from '../curriculos/versoes';
 import { semestreValido } from '../planejamento/rotuloSemestre';
 import {
   DISCIPLINAS_POR_SEMESTRE_MAX,
@@ -102,7 +103,17 @@ function lerOpcoes(bruto: unknown, rel: string[]): RegistroAluno['opcoes'] {
   } else if (ehObjeto(bruto)) {
     rel.push(`opcoes.semestreInicial inválido (${texto(s)}): ignorado (use o formato AAAA.1 ou AAAA.2).`);
   }
-  return { cursandoComoAprovada, limiteAulas, disciplinasPorSemestre, semestreInicial };
+  // Campo novo (decisão D5): arquivos antigos não o têm (padrão 2020.1, sem aviso); presente e inválido = aviso.
+  let versaoRegras: VersaoRegras = VERSAO_REGRAS_PADRAO;
+  const v = o.versaoRegras;
+  if (v === undefined) {
+    // padrão
+  } else if (versaoRegrasValida(v)) {
+    versaoRegras = v;
+  } else if (ehObjeto(bruto)) {
+    rel.push(`opcoes.versaoRegras inválido (${texto(v)}): usada a versão ${VERSAO_REGRAS_PADRAO}.`);
+  }
+  return { cursandoComoAprovada, limiteAulas, disciplinasPorSemestre, semestreInicial, versaoRegras };
 }
 
 /**

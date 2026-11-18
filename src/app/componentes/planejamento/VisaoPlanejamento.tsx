@@ -1,6 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { avaliarPlano, montarPlano } from '../../../dominio/planejamento';
-import { motor } from '../../estado/motorEcv';
 import type { EstadoAluno } from '../../estado/useEstadoAluno';
 import { PrimeiroSemestre } from './PrimeiroSemestre';
 import { QuantidadePorSemestre } from './QuantidadePorSemestre';
@@ -19,9 +18,9 @@ function lerJaViu(): boolean {
 }
 
 export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
-  const { registro, dispatch } = e;
+  const { registro, dispatch, motor } = e;
   const idSugestao = useId();
-  const avaliacao = useMemo(() => avaliarPlano(motor, registro), [registro]);
+  const avaliacao = useMemo(() => avaliarPlano(motor, registro), [motor, registro]);
   const vazio = registro.plano.semestres.length === 0;
   const [jaViu, setJaViu] = useState(lerJaViu);
   useEffect(() => {

@@ -1,5 +1,5 @@
 import type { ExpressaoRequisito } from '../../dominio/tipos';
-import { motor, porCodigo, rotuloCodigo } from '../estado/motorEcv';
+import { porCodigo, rotuloCodigo } from '../estado/motorEcv';
 import { linhasFaltantes } from '../estado/textoFaltantes';
 import { SituacaoHistorico } from './SituacaoHistorico';
 import type { EstadoAluno } from '../estado/useEstadoAluno';
@@ -58,6 +58,7 @@ export function DetalheDisciplina({ e }: { e: EstadoAluno }) {
       </section>
     );
   }
+  const { motor } = e;
   const sit = motor.situacao(d.codigo, e.base);
   const sel = (codigo: string) => e.dispatch({ tipo: 'selecionar', codigo });
   const lista = (m: ReturnType<typeof motor.preRequisitos>, direto: boolean): [string, boolean][] =>

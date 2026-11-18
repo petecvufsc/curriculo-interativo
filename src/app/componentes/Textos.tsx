@@ -70,9 +70,16 @@ export function TextoAjuda() {
         Pré-requisitos com &quot;ou&quot; aceitam também códigos do currículo anterior (indicados como &quot;currículo
         anterior&quot; no detalhe da disciplina).
       </p>
+      <h3>Regras de pré-requisitos (2020.1 e 2028.1)</h3>
+      <p>
+        No seletor &quot;Regras de pré-requisitos&quot;, a versão <strong>2020.1</strong> usa os pré-requisitos atuais e a
+        versão <strong>2028.1</strong> usa os novos, que valem a partir de 2028.1 (ECV2501, ECV2505, ECV2704 e ECV2932).
+        Trocar de versão não apaga nada do seu histórico: só muda o que fica disponível e o que o plano acusa como falta
+        de pré-requisito. A partir de novembro de 2027, apenas a versão 2028.1 estará disponível.
+      </p>
       <h3>Fonte dos dados</h3>
       <p>
-        Os dados vêm do PDF oficial do currículo 2020.1. Confira sempre no CAGR; esta ferramenta pode conter erros.
+        Os dados vêm do PDF oficial do currículo 2020.1 e do comunicado da Coordenação sobre os novos pré-requisitos. Confira sempre no CAGR; esta ferramenta pode conter erros.
       </p>
     </div>
   );

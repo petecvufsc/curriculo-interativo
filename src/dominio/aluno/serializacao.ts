@@ -17,6 +17,9 @@ export function serializar(registro: RegistroAluno): string {
       opcoes: {
         cursandoComoAprovada: registro.opcoes.cursandoComoAprovada,
         limiteAulas: registro.opcoes.limiteAulas,
+        disciplinasPorSemestre: registro.opcoes.disciplinasPorSemestre,
+        semestreInicial: registro.opcoes.semestreInicial,
+        versaoRegras: registro.opcoes.versaoRegras,
       },
     },
     null,

@@ -3,7 +3,7 @@ import { aprovadasDe, baseSimulacao, type OpcoesAluno, type RegistroAluno, type 
 import { calcularDestaques } from './destaques';
 import type { Aviso } from './arquivo';
 import { mensagemAlternar, mensagemFase, mensagemStatus } from './mensagens';
-import { motor } from './motorEcv';
+import { motorDe } from './motorEcv';
 import { aplicarFase, definir, limparStatus, mudarOpcoes } from './operacoesRegistro';
 import { aplicarPlano, semestresPlanejados, type OperacaoPlano } from './operacoesPlano';
 import { lerRegistroSalvo, usePersistencia } from './persistencia';
@@ -115,10 +115,15 @@ export function useEstadoAluno() {
   // Base da simulação (respeita a opção "em andamento como aprovadas").
   const base = useMemo(() => baseSimulacao(registro), [registro]);
   const planejadas = useMemo(() => semestresPlanejados(registro), [registro]);
-  const destaques = useMemo(() => calcularDestaques(estado.modo, estado.selecionada, base), [estado.modo, estado.selecionada, base]);
-  const simulacao = useMemo(() => motor.simular(base), [base]);
-  const progresso = useMemo(() => motor.progresso(base), [base]);
-  return { ...estado, aprovadas, base, planejadas, destaques, simulacao, progresso, dispatch };
+  // Regras de pré-requisito da versão escolhida (2020.1 ou 2028.1): tudo abaixo é recalculado ao trocar.
+  const motor = motorDe(registro.opcoes.versaoRegras);
+  const destaques = useMemo(
+    () => calcularDestaques(motor, estado.modo, estado.selecionada, base),
+    [motor, estado.modo, estado.selecionada, base],
+  );
+  const simulacao = useMemo(() => motor.simular(base), [motor, base]);
+  const progresso = useMemo(() => motor.progresso(base), [motor, base]);
+  return { ...estado, motor, aprovadas, base, planejadas, destaques, simulacao, progresso, dispatch };
 }
 
 export type EstadoAluno = ReturnType<typeof useEstadoAluno>;

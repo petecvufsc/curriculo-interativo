@@ -66,8 +66,16 @@
   - Painel lateral: "Disciplinas disponíveis" só aparece depois de Simular; antes, a dica fica junto do botão.
   - Alvos de toque: em telas de toque já eram de 44 a 48 px; no computador ficaram como estavam (24 px ou mais, WCAG 2.2 AA). Não medido no celular desta vez.
   - 337 testes, build ok. **Falta enviar:** `git push` na pasta de publicação.
+- 18/11/2026 — **Versões das regras de pré-requisito (decisão D5).** Comunicado da Coordenação (repassado pelo CALEC; o usuário confirmou que é oficial): ECV2501, ECV2505, ECV2932 e ECV2704 ganham pré-requisitos novos, e a entrada em vigor foi **adiada de 2027.1 para 2028.1** pelo NDE e pelo Colegiado.
+  - **Problema encontrado:** `ecv-2020-1.json` (transcrito do PDF) já trazia os pré-requisitos **novos**, então o app os aplicava a todos desde já, ao contrário da decisão da Coordenação.
+  - **Solução:** caixa seletora "Regras de pré-requisitos" com **2020.1** (atuais, padrão) e **2028.1** (novos). Os dados do JSON ficam como estão (= 2028.1); a versão 2020.1 troca as quatro disciplinas pelos pré-requisitos antigos do comunicado (`dominio/curriculos/versoes.ts`). A escolha vai em `opcoes.versaoRegras`, é salva no navegador e exportada. Arquivos antigos, sem o campo, abrem em 2020.1.
+  - Aviso fixo na tela, na Ajuda e no seletor: "A partir de novembro de 2027, apenas a versão 2028.1 estará disponível". **A data é aproximada (pedido do usuário); confirmar com a Coordenação.** O aviso é só texto: o app não desliga a versão 2020.1 sozinho.
+  - Sem regra de transição por semestre: o aluno escolhe a versão (decisão do usuário). Quem já foi aprovado não é afetado.
+  - **Defeito antigo corrigido:** `serializar` gravava só 2 das opções; "disciplinas por semestre" e "primeiro semestre" se perdiam ao recarregar e ao exportar. Agora grava todas, com teste de ida e volta.
+  - 362 testes, build ok. **Falta enviar:** `git push` na pasta de publicação.
 
 ## Decisões
+- 18/11/2026, decisão D5 — **Duas versões das regras de pré-requisito do currículo 2020.1:** 2020.1 (atuais, até 2027.2) e 2028.1 (novos, a partir de 2028.1), por escolha do aluno. Fonte: comunicado oficial da Coordenação (via CALEC). Exceção à D1 (PDF como fonte única) apenas para esses quatro pré-requisitos.
 - 11/11/2026, decisão D1 — **A fonte de verdade das regras é o currículo oficial PDF 2020.1.** O conjunto do programa original fica só como referência para os testes de paridade e para documentar as divergências.
   - Consequências: pré-requisitos no formato do PDF, com grupos OU de grupos E, incluindo códigos antigos (que valem para históricos de alunos migrados); estágio ECV2000 com 540 h-a; ECV2504 e ECV2604 com 54 h-a; inclusão de ECV2905, ECV2906 e ECV2971–2974.
   - Contradições internas do PDF (critério provisório, até a coordenação confirmar):

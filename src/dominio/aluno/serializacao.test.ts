@@ -74,7 +74,7 @@ describe('importar: aceitação e relatório (§12)', () => {
       formato: 'curriculo-interativo-ecv', versao: 1, curriculoId: 'teste', atualizadoEm: DATA_FIXA,
       status: { TST0001: 'aprovada', TST0002: 'cursando', TST0003: 'reprovada' },
       plano: { semestres: [{ codigos: ['TST0004', 'TST0009'] }] },
-      opcoes: { cursandoComoAprovada: false, limiteAulas: 24, disciplinasPorSemestre: 4, semestreInicial: '2027.1' },
+      opcoes: { cursandoComoAprovada: false, limiteAulas: 24, disciplinasPorSemestre: 4, semestreInicial: '2027.1', versaoRegras: '2020.1' },
     });
   });
 
@@ -128,7 +128,7 @@ describe('importar: aceitação e relatório (§12)', () => {
 
   it('opções inválidas voltam ao padrão com relato', () => {
     const r = aceito(valido({ opcoes: { cursandoComoAprovada: 'sim', limiteAulas: 0 } }));
-    expect(r.registro.opcoes).toEqual({ cursandoComoAprovada: true, limiteAulas: 30, disciplinasPorSemestre: 5, semestreInicial: null });
+    expect(r.registro.opcoes).toEqual({ cursandoComoAprovada: true, limiteAulas: 30, disciplinasPorSemestre: 5, semestreInicial: null, versaoRegras: '2020.1' });
     expect(r.relatorio).toHaveLength(2);
   });
 
@@ -150,6 +150,19 @@ describe('ida e volta serializar -> importar', () => {
     expect(r.registro).toEqual(original);
     expect(r.relatorio).toEqual([]);
     expect(serializar(r.registro)).toBe(serializar(original));
+  });
+
+  it('todas as opções, com valores diferentes do padrão, sobrevivem à ida e volta (regressão: só 2 eram gravadas)', () => {
+    const original = reg({
+      cursandoComoAprovada: false,
+      limiteAulas: 27,
+      disciplinasPorSemestre: 3,
+      semestreInicial: '2028.1',
+      versaoRegras: '2028.1',
+    });
+    const r = aceito(serializar(original));
+    expect(r.registro.opcoes).toEqual(original.opcoes);
+    expect(r.relatorio).toEqual([]);
   });
 
   it('código externo aprovado sobrevive à ida e volta (com relato informativo)', () => {
@@ -192,6 +205,29 @@ describe('opcoes.disciplinasPorSemestre (§11, §12)', () => {
     const r = aceito(arquivo(`{"cursandoComoAprovada":true,"limiteAulas":30,"disciplinasPorSemestre":${v}}`));
     expect(r.registro.opcoes.disciplinasPorSemestre).toBe(5);
     expect(r.relatorio.some((l) => l.includes('disciplinasPorSemestre'))).toBe(true);
+  });
+});
+
+describe('opcoes.versaoRegras (decisão D5)', () => {
+  const arquivo = (opcoes: string) =>
+    `{"formato":"curriculo-interativo-ecv","versao":1,"curriculoId":"teste","atualizadoEm":"x","status":{},"plano":{"semestres":[]},"opcoes":${opcoes}}`;
+  const base = '"cursandoComoAprovada":true,"limiteAulas":30';
+
+  it('arquivo antigo, sem o campo: 2020.1 (atual), sem reclamar', () => {
+    const r = aceito(arquivo(`{${base}}`));
+    expect(r.registro.opcoes.versaoRegras).toBe('2020.1');
+    expect(r.relatorio.some((l) => l.includes('versaoRegras'))).toBe(false);
+  });
+
+  it('"2020.1" e "2028.1" são mantidas', () => {
+    expect(aceito(arquivo(`{${base},"versaoRegras":"2028.1"}`)).registro.opcoes.versaoRegras).toBe('2028.1');
+    expect(aceito(arquivo(`{${base},"versaoRegras":"2020.1"}`)).registro.opcoes.versaoRegras).toBe('2020.1');
+  });
+
+  it.each(['"2027.1"', '"2030.1"', '2028.1', 'null', 'true'])('valor inválido (%s) volta a 2020.1 e é relatado', (v) => {
+    const r = aceito(arquivo(`{${base},"versaoRegras":${v}}`));
+    expect(r.registro.opcoes.versaoRegras).toBe('2020.1');
+    expect(r.relatorio.some((l) => l.includes('versaoRegras'))).toBe(true);
   });
 });
 

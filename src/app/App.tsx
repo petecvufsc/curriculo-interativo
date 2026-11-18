@@ -7,6 +7,7 @@ import { Legenda } from './componentes/Legenda';
 import { MensagemAcao } from './componentes/MensagemAcao';
 import { PainelLateral } from './componentes/PainelLateral';
 import { ResumoIntegralizacao } from './componentes/ResumoIntegralizacao';
+import { SeletorVersao } from './componentes/SeletorVersao';
 import { VisaoPlanejamento } from './componentes/planejamento/VisaoPlanejamento';
 import { TextoAjuda, TextoSobre } from './componentes/Textos';
 import { formatarDataIso } from './estado/formato';
@@ -41,6 +42,7 @@ export function App() {
       <div className="corpo">
         <main className="principal" id="conteudo" tabIndex={-1}>
           <ResumoIntegralizacao e={e} />
+          <SeletorVersao e={e} />
           <Abas aba={e.aba} onMudar={(aba) => e.dispatch({ tipo: 'aba', aba })} />
           <MensagemAcao e={e} />
           <div role="tabpanel" id="painel-grade" aria-labelledby="aba-grade" hidden={e.aba !== 'grade'}>

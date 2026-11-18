@@ -8,7 +8,8 @@ import {
   type SemestreAvaliado,
 } from '../../../dominio/planejamento';
 import { textoCreditos } from '../../estado/creditos';
-import { motor, porCodigo } from '../../estado/motorEcv';
+import type { Motor } from '../../../dominio/regras';
+import { porCodigo } from '../../estado/motorEcv';
 import type { EstadoAluno } from '../../estado/useEstadoAluno';
 import { AdicionarDisciplina } from './AdicionarDisciplina';
 import { MedidorCreditos } from './MedidorCreditos';
@@ -22,7 +23,7 @@ interface Props {
 }
 
 /** Quantas outras disciplinas do curso esta libera (direta ou indiretamente). */
-function Impacto({ codigo }: { codigo: string }) {
+function Impacto({ motor, codigo }: { motor: Motor; codigo: string }) {
   const n = impactoDe(motor, codigo);
   if (n === 0) return null;
   return (
@@ -34,10 +35,10 @@ function Impacto({ codigo }: { codigo: string }) {
 
 /** Um semestre do plano, como uma coluna: título, medidor de créditos, linhas enxutas e a busca. */
 export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
-  const { registro, dispatch } = e;
+  const { registro, dispatch, motor } = e;
   const k = s.numero;
   const indice = k - 1;
-  const disponiveis = useMemo(() => disponiveisNoSemestre(motor, registro, k), [registro, k]);
+  const disponiveis = useMemo(() => disponiveisNoSemestre(motor, registro, k), [motor, registro, k]);
   const rotulo = rotuloSemestre(registro.opcoes.semestreInicial, k);
   const proximo = k === 1 ? ' (próximo)' : '';
   const titulo = rotulo ? `${rotulo}${proximo}` : `Semestre ${k}${proximo}`;
@@ -91,7 +92,7 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
                     <span className="item-plano-nome">{d ? d.nome : item.codigo}</span>
                     <span className="item-plano-meta">
                       <span className="muted">{d ? `${item.codigo} · ${textoCreditos(d)}` : item.codigo}</span>
-                      <Impacto codigo={item.codigo} />
+                      <Impacto motor={motor} codigo={item.codigo} />
                     </span>
                   </div>
                   <button
@@ -118,6 +119,7 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
       )}
 
       <AdicionarDisciplina
+        motor={motor}
         nomeSemestre={nome}
         codigos={disponiveis}
         onAdicionar={(codigo) => dispatch({ tipo: 'plano', op: { tipo: 'adicionar', indice, codigo } })}

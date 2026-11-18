@@ -1,0 +1,66 @@
+import type { Curriculo, Disciplina } from '../tipos';
+
+/**
+ * Versões de regras de pré-requisito do currículo 2020.1.
+ *
+ * Fonte (decisão D5, docs/ACOMPANHAMENTO.md): comunicado da Coordenação do Curso de Graduação em Engenharia Civil,
+ * repassado pelo CALEC em 18/11/2026. Os pré-requisitos de quatro disciplinas mudam, e a entrada em vigor foi
+ * adiada pelo NDE e pelo Colegiado de 2027.1 para **2028.1**. Até lá valem os pré-requisitos antigos.
+ *
+ * - `2020.1`: pré-requisitos vigentes até 2027.2.
+ * - `2028.1`: pré-requisitos novos, a partir de 2028.1.
+ *
+ * Os dados em `ecv-2020-1.json` (transcritos do PDF) já trazem os pré-requisitos novos; a versão `2020.1`
+ * troca os quatro pelos antigos. Pura: devolve um novo currículo e não altera o original.
+ */
+export type VersaoRegras = '2020.1' | '2028.1';
+
+export const VERSOES_REGRAS: readonly VersaoRegras[] = ['2020.1', '2028.1'];
+
+/** Versão padrão: a que vale hoje. */
+export const VERSAO_REGRAS_PADRAO: VersaoRegras = '2020.1';
+
+export function versaoRegrasValida(v: unknown): v is VersaoRegras {
+  return v === '2020.1' || v === '2028.1';
+}
+
+export interface AlteracaoPreRequisitos {
+  codigo: string;
+  /** Vigente até 2027.2 ("Como é hoje" no comunicado). Lista de grupos E dentro de um OU; vazio = sem pré-requisito. */
+  antes: string[][];
+  /** Vigente a partir de 2028.1 ("A partir de 2027.1", depois adiado). */
+  depois: string[][];
+}
+
+export const ALTERACOES_2028_1: readonly AlteracaoPreRequisitos[] = [
+  { codigo: 'ECV2501', antes: [['INE5108']], depois: [['ECV2302', 'INE5108']] },
+  { codigo: 'ECV2505', antes: [['ECV2401', 'ECV2404']], depois: [['ECV2401', 'ECV2404', 'MTM3131']] },
+  { codigo: 'ECV2932', antes: [['ECV2405']], depois: [['ECV2603']] },
+  {
+    codigo: 'ECV2704',
+    antes: [],
+    depois: [['ECV2401', 'ECV2402', 'ECV2403', 'ECV2404', 'ECV2405', 'ENS5101', 'MTM3103']],
+  },
+];
+
+/** Aviso mostrado ao aluno sobre o fim da versão 2020.1. Data aproximada: confirmar com a Coordenação. */
+export const AVISO_FIM_VERSAO_2020_1 =
+  'A partir de novembro de 2027, apenas a versão 2028.1 estará disponível neste aplicativo.';
+
+export const DESCRICAO_VERSAO: Record<VersaoRegras, string> = {
+  '2020.1': 'Currículo 2020.1 — pré-requisitos atuais (valem até 2027.2)',
+  '2028.1': 'Currículo 2028.1 — novos pré-requisitos (valem a partir de 2028.1)',
+};
+
+/** Currículo com os pré-requisitos da versão escolhida. A versão 2028.1 é o próprio currículo transcrito. */
+export function curriculoDaVersao(c: Curriculo, versao: VersaoRegras): Curriculo {
+  if (versao === '2028.1') return c;
+  const antes = new Map(ALTERACOES_2028_1.map((a) => [a.codigo, a.antes]));
+  return {
+    ...c,
+    disciplinas: c.disciplinas.map((d): Disciplina => {
+      const pre = antes.get(d.codigo);
+      return pre ? { ...d, preRequisitos: pre.map((g) => [...g]) } : d;
+    }),
+  };
+}

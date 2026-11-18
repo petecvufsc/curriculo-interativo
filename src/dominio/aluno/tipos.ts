@@ -1,4 +1,5 @@
 // Registro do aluno: status por disciplina, plano de semestres e opções (docs/regras-de-negocio.md §10 e §12).
+import { VERSAO_REGRAS_PADRAO, type VersaoRegras } from '../curriculos/versoes';
 
 /** Status armazenado no registro (§10). `nao-cursada` é o padrão e fica ausente do registro. */
 export type StatusDisciplina = 'aprovada' | 'cursando' | 'reprovada';
@@ -38,6 +39,8 @@ export interface OpcoesAluno {
   disciplinasPorSemestre: number;
   /** Nome do primeiro semestre do plano, "AAAA.1" ou "AAAA.2" (ex.: "2027.1"); null = sem nome real. */
   semestreInicial: string | null;
+  /** Versão das regras de pré-requisito: "2020.1" (atuais, padrão) ou "2028.1" (novos). Decisão D5. */
+  versaoRegras: VersaoRegras;
 }
 
 /** Registro salvo / arquivo exportado (§12). */
@@ -59,6 +62,7 @@ export function opcoesPadrao(): OpcoesAluno {
     limiteAulas: LIMITE_AULAS_PADRAO,
     disciplinasPorSemestre: DISCIPLINAS_POR_SEMESTRE_PADRAO,
     semestreInicial: null,
+    versaoRegras: VERSAO_REGRAS_PADRAO,
   };
 }
 

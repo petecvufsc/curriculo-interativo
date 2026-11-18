@@ -168,6 +168,17 @@ input[type='checkbox']:indeterminate::after { content: ''; width: 10px; height: 
 .barra-resumo { font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--texto); }
 @media (max-width: 420px) { .barra-resumo { display: none; } .barra-acoes { grid-template-columns: auto 1fr; } }
 
+/* Versão das regras de pré-requisito (2020.1 atual, 2028.1 novas) */
+.versao { background: var(--superficie); border: 1px solid var(--borda); border-left: 4px solid var(--verde); border-radius: 4px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.9375rem; box-shadow: var(--sombra); }
+.versao-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.versao-linha label { font-weight: 700; }
+.versao-linha .campo { flex: 1 1 18rem; max-width: 100%; }
+.versao-aviso { margin-top: 6px; color: var(--texto); }
+.versao-mudancas { margin-top: 6px; }
+.versao-mudancas summary { cursor: pointer; font-weight: 600; min-height: 32px; display: flex; align-items: center; }
+.versao-mudancas ul { margin: 4px 0 6px; padding-left: 20px; list-style: disc; display: flex; flex-direction: column; gap: 4px; }
+@media (pointer: coarse) { .versao-mudancas summary { min-height: 44px; } }
+
 /* Integralização do curso: sempre à vista no topo */
 .resumo-integralizacao { background: var(--superficie); border: 1px solid var(--borda); border-radius: 4px; padding: 10px 14px 12px; margin-bottom: 14px; box-shadow: var(--sombra); }
 .resumo-linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; }
