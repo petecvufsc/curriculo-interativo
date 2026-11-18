@@ -35,6 +35,22 @@
 /* Virada dos pré-requisitos (2028.1): aviso na coluna do primeiro semestre afetado */
 .semestre-virada { font-size: 0.875rem; padding: 4px 8px; border-left: 4px solid var(--alerta-borda); background: var(--alerta-tinta); color: var(--texto); border-radius: 0 3px 3px 0; }
 .nota-versao-plano { font-size: 0.9375rem; }
+
+.nota-origem { font-size: 0.9375rem; padding: 6px 10px; border-left: 4px solid var(--verde); background: var(--sucesso-tinta); color: var(--texto); border-radius: 0 3px 3px 0; }
+
+/* Arrastar entre semestres: o cartão mostra que pode ser arrastado; o semestre de destino acende */
+.item-plano[draggable='true'] { cursor: grab; }
+.item-plano[draggable='true']:active { cursor: grabbing; }
+.semestre.alvo-soltar { outline: 3px dashed var(--verde); outline-offset: -3px; background: var(--cursada-bg); }
+/* "Mover para…": alternativa ao arrasto (serve a teclado e toque). Com mouse, fica discreta e aparece ao passar o mouse
+   ou ao focar o cartão, sem empurrar o layout; sem mouse (toque), fica sempre à vista sob a disciplina. */
+.item-plano { position: relative; }
+.mover-para { font: inherit; font-size: 0.875rem; min-height: 32px; max-width: 100%; padding: 2px 6px; background: var(--superficie); color: var(--texto); border: 1px solid var(--borda-forte); border-radius: 4px; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) {
+  .mover-para { position: absolute; right: 8px; bottom: 6px; width: 7.5rem; opacity: 0; }
+  .item-plano:hover .mover-para, .item-plano:focus-within .mover-para, .mover-para:focus { opacity: 1; }
+}
+@media (hover: none), (pointer: coarse) { .mover-para { margin-top: 6px; min-height: 44px; } }
 .semestre-vazio { font-size: 0.9375rem; }
 
 /* Medidor de créditos (marcas em 16 e 30) */

@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react';
-import { avaliarPlano, montarPlano } from '../../../dominio/planejamento';
+import { avaliarPlano, montarGradeOficial, montarPlano } from '../../../dominio/planejamento';
 import type { EstadoAluno } from '../../estado/useEstadoAluno';
 import { PrimeiroSemestre } from './PrimeiroSemestre';
 import { QuantidadePorSemestre } from './QuantidadePorSemestre';
@@ -34,13 +34,33 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
   }, [vazio, jaViu]);
 
   const limpar = () => {
-    if (vazio || window.confirm('Remover todos os semestres do plano?')) dispatch({ tipo: 'plano', op: { tipo: 'limpar' } });
+    if (vazio || window.confirm('Remover todos os semestres do plano?')) {
+      dispatch({ tipo: 'plano', op: { tipo: 'limpar' } });
+      setOrigem(null);
+    }
   };
 
+  // De onde veio o plano montado automaticamente (some ao limpar ou ao refazer): diz a fase de partida da grade oficial
+  const [origem, setOrigem] = useState<string | null>(null);
+
   const montar = () => {
-    if (!vazio && !window.confirm('Substituir o plano atual por um plano montado do zero, até o fim do curso?')) return;
+    if (!vazio && !window.confirm('Substituir o plano atual por um plano otimizado, montado do zero até o fim do curso?')) return;
     const { semestres } = montarPlano(motorDoSemestre, registro);
     dispatch({ tipo: 'plano', op: { tipo: 'definirPlano', semestres } });
+    setOrigem(
+      `Plano otimizado, com ${registro.opcoes.disciplinasPorSemestre} disciplinas por semestre: sugestão da ferramenta, não considera a oferta de turmas. Com mais disciplinas por semestre, o curso termina antes.`,
+    );
+  };
+
+  const montarOficial = () => {
+    if (!vazio && !window.confirm('Substituir o plano atual por um plano montado pela grade oficial, a partir da sua fase?')) return;
+    const { semestres, faseAtual } = montarGradeOficial(motorDoSemestre, registro);
+    dispatch({ tipo: 'plano', op: { tipo: 'definirPlano', semestres } });
+    setOrigem(
+      faseAtual === null
+        ? 'Você já cumpriu todas as obrigatórias: não há o que planejar pela grade oficial.'
+        : `Grade oficial a partir da ${faseAtual}ª fase (a ferramenta deduziu a sua fase pelo que você marcou). Cada semestre traz as obrigatórias de uma fase; as que ficaram para trás entram junto com a primeira. Confira no CAGR.`,
+    );
   };
 
   return (
@@ -60,9 +80,15 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
               plano (por exemplo, 2027.1). Os seguintes são nomeados em sequência.
             </li>
             <li>
-              Clique em <strong>Montar plano até o fim</strong> para o app propor todos os semestres até concluir as
-              obrigatórias, ou em <strong>+ Adicionar semestre</strong> para montar um a um. Em cada semestre, use{' '}
-              <strong>Sugerir</strong> ou a busca de disciplinas, que mostra quantas outras cada uma libera.
+              Clique em <strong>Montar pela grade oficial</strong> para seguir as fases do currículo a partir da sua fase, ou
+              em <strong>Montar plano otimizado</strong> para o app propor os semestres que mais destravam o curso, ou em{' '}
+              <strong>+ Adicionar semestre</strong> para montar um a um. Em cada semestre, use <strong>Sugerir</strong> ou a
+              busca de disciplinas, que mostra quantas outras cada uma libera.
+            </li>
+            <li>
+              Para mudar uma disciplina de semestre, <strong>arraste</strong> o cartão para outro semestre ou use{' '}
+              <strong>Mover para…</strong> (que também serve a teclado e celular). O app mostra se faltou pré-requisito e dá
+              para desfazer.
             </li>
             <li>
               O medidor de cada semestre mostra os créditos entre 16 e 30, e o app avisa se falta pré-requisito. O que está
@@ -92,8 +118,11 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
         />
       </div>
       <div className="plano-botoes">
-        <button type="button" className="botao primario" onClick={montar}>
-          Montar plano até o fim
+        <button type="button" className="botao primario" onClick={montarOficial}>
+          Montar pela grade oficial
+        </button>
+        <button type="button" className="botao" onClick={montar}>
+          Montar plano otimizado
         </button>
         <button type="button" className="botao" onClick={() => dispatch({ tipo: 'plano', op: { tipo: 'adicionarSemestre' } })}>
           + Adicionar semestre
@@ -106,9 +135,17 @@ export function VisaoPlanejamento({ e }: { e: EstadoAluno }) {
         Cada semestre usa os pré-requisitos do seu período: até 2027.2 valem os atuais e, a partir de 2028.1, os novos
         (ECV2501, ECV2505, ECV2704 e ECV2932).
       </p>
+      {origem && !vazio && (
+        <p className="nota-origem" role="status">
+          {origem}
+        </p>
+      )}
       <ResumoDoPlano avaliacao={avaliacao} semestreInicial={e.inicioPlano} />
       {vazio ? (
-        <p className="muted">Nenhum semestre no plano. Use &quot;Montar plano até o fim&quot; ou &quot;+ Adicionar semestre&quot; para começar.</p>
+        <p className="muted">
+          Nenhum semestre no plano. Use &quot;Montar pela grade oficial&quot;, &quot;Montar plano otimizado&quot; ou &quot;+ Adicionar
+          semestre&quot; para começar.
+        </p>
       ) : (
         <ol className="semestres">
           {avaliacao.semestres.map((s) => (

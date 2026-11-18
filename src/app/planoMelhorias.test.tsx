@@ -25,7 +25,7 @@ afterEach(() => {
 type U = ReturnType<typeof userEvent.setup>;
 const abrirPlanejamento = (u: U) => u.click(screen.getByRole('tab', { name: 'Planejamento' }));
 const semestres = () => screen.queryAllByRole('listitem', { name: /^(Semestre \d|\d{4}\.[12])/ });
-const montar = (u: U) => u.click(screen.getByRole('button', { name: 'Montar plano até o fim' }));
+const montar = (u: U) => u.click(screen.getByRole('button', { name: 'Montar plano otimizado' }));
 const situacao = () => screen.getByRole('status', { name: 'Situação do plano' });
 
 describe('montar plano até o fim', () => {

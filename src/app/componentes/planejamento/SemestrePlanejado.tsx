@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, type DragEvent } from 'react';
 import {
   baseDoSemestre,
   disponiveisNoSemestre,
@@ -15,6 +15,9 @@ import type { EstadoAluno } from '../../estado/useEstadoAluno';
 import { AdicionarDisciplina } from './AdicionarDisciplina';
 import { MedidorCreditos } from './MedidorCreditos';
 import { textosDoProblema } from './textosPlano';
+
+/** Tipo do dado arrastado entre semestres (só o app reconhece; arrastar texto ou arquivos de fora não faz nada). */
+const TIPO_ARRASTO = 'application/x-disciplina-plano';
 
 interface Props {
   e: EstadoAluno;
@@ -37,6 +40,7 @@ function Impacto({ motor, codigo }: { motor: Motor; codigo: string }) {
 /** Um semestre do plano, como uma coluna: título, medidor de créditos, linhas enxutas e a busca. */
 export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
   const { registro, dispatch, motorDoSemestre } = e;
+  const totalSemestres = registro.plano.semestres.length;
   const k = s.numero;
   const indice = k - 1;
   // Regras do período deste semestre (até 2027.2 as atuais; de 2028.1 em diante as novas)
@@ -64,8 +68,36 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
     dispatch({ tipo: 'plano', op: { tipo: 'removerSemestre', indice } });
   };
 
+  // Arrastar uma disciplina de outro semestre e soltar aqui (equivale a "Mover para…", que também serve a teclado e toque)
+  const [alvo, setAlvo] = useState(false);
+  const traz = (ev: DragEvent<HTMLElement>) => ev.dataTransfer.types.includes(TIPO_ARRASTO);
+  const nomesDosSemestres = Array.from({ length: totalSemestres }, (_, i) => rotuloSemestre(e.inicioPlano, i + 1) ?? `Semestre ${i + 1}`);
+
   return (
-    <li className="semestre" aria-labelledby={`semestre-${k}`}>
+    <li
+      className={`semestre${alvo ? ' alvo-soltar' : ''}`}
+      aria-labelledby={`semestre-${k}`}
+      onDragOver={(ev) => {
+        if (!traz(ev)) return;
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = 'move';
+        if (!alvo) setAlvo(true);
+      }}
+      onDragLeave={(ev) => {
+        if (!ev.currentTarget.contains(ev.relatedTarget as Node | null)) setAlvo(false);
+      }}
+      onDrop={(ev) => {
+        setAlvo(false);
+        if (!traz(ev)) return;
+        ev.preventDefault();
+        try {
+          const origem = JSON.parse(ev.dataTransfer.getData(TIPO_ARRASTO)) as { indice: number; posicao: number };
+          if (origem.indice !== indice) dispatch({ tipo: 'plano', op: { tipo: 'mover', indice: origem.indice, posicao: origem.posicao, para: indice } });
+        } catch {
+          /* dado de arrasto inválido: ignora */
+        }
+      }}
+    >
       <header className="semestre-topo">
         <h3 id={`semestre-${k}`}>{titulo}</h3>
         <div className="semestre-acoes">
@@ -95,7 +127,15 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
           {s.itens.map((item, posicao) => {
             const d = porCodigo.get(item.codigo);
             return (
-              <li key={`${item.codigo}-${posicao}`} className={`item-plano${item.problemas.length ? ' com-problema' : ''}`}>
+              <li
+                key={`${item.codigo}-${posicao}`}
+                className={`item-plano${item.problemas.length ? ' com-problema' : ''}`}
+                draggable
+                onDragStart={(ev) => {
+                  ev.dataTransfer.setData(TIPO_ARRASTO, JSON.stringify({ indice, posicao }));
+                  ev.dataTransfer.effectAllowed = 'move';
+                }}
+              >
                 <div className="item-plano-linha">
                   <div className="item-plano-textos">
                     <span className="item-plano-nome">{d ? d.nome : item.codigo}</span>
@@ -114,6 +154,26 @@ export function SemestrePlanejado({ e, semestre: s, idSugestao }: Props) {
                     <span aria-hidden="true">×</span>
                   </button>
                 </div>
+                {totalSemestres > 1 && (
+                  <select
+                    className="mover-para"
+                    value=""
+                    aria-label={`Mover ${d?.nome ?? item.codigo} do ${nome} para outro semestre`}
+                    onChange={(ev) => {
+                      if (ev.target.value !== '')
+                        dispatch({ tipo: 'plano', op: { tipo: 'mover', indice, posicao, para: Number(ev.target.value) } });
+                    }}
+                  >
+                    <option value="">Mover para…</option>
+                    {nomesDosSemestres.map((n, i) =>
+                      i === indice ? null : (
+                        <option key={i} value={i}>
+                          {n}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                )}
                 {item.problemas.map((p, i) => (
                   <p key={i} className="problema">
                     {textosDoProblema(p).map((linha, j) => (

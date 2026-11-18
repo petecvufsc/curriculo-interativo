@@ -2,7 +2,8 @@ import { useMemo, useReducer } from 'react';
 import { aprovadasDe, baseSimulacao, type OpcoesAluno, type RegistroAluno, type StatusEditavel } from '../../dominio/aluno';
 import { calcularDestaques } from './destaques';
 import type { Aviso } from './arquivo';
-import { mensagemAlternar, mensagemFase, mensagemStatus } from './mensagens';
+import { rotuloSemestre } from '../../dominio/planejamento';
+import { mensagemAlternar, mensagemFase, mensagemMover, mensagemStatus } from './mensagens';
 import { inicioDoPlano, motorDe, motorDoSemestreDe, versaoDoRegistro } from './motorEcv';
 import { aplicarFase, definir, limparStatus, mudarOpcoes } from './operacoesRegistro';
 import { aplicarPlano, semestresPlanejados, type OperacaoPlano } from './operacoesPlano';
@@ -63,6 +64,8 @@ const LIMPAM_MENSAGEM: ReadonlySet<Acao['tipo']> = new Set(['opcoes', 'plano', '
 
 function reducer(e: Estado, a: Acao): Estado {
   const novo = reducerBase(e, a);
+  // Mover uma disciplina de semestre tem o seu próprio aviso com "Desfazer" (que restaura o plano de antes)
+  if (a.tipo === 'plano' && a.op.tipo === 'mover') return novo;
   return LIMPAM_MENSAGEM.has(a.tipo) ? { ...novo, mensagem: null } : novo;
 }
 
@@ -92,9 +95,16 @@ function reducerBase(e: Estado, a: Acao): Estado {
       return { ...e, selecionada: null, modo: 'simulacao', simulou: true, aba: 'grade' };
     case 'opcoes':
       return { ...e, registro: mudarOpcoes(r, a.opcoes) };
-    case 'plano':
+    case 'plano': {
       // O primeiro semestre é obrigatório: ao mexer no plano, fixa o do calendário se ainda não houver (não "anda" depois).
-      return { ...e, registro: aplicarPlano(r.opcoes.semestreInicial ? r : mudarOpcoes(r, { semestreInicial: inicioDoPlano(null) }), a.op) };
+      const comInicio = r.opcoes.semestreInicial ? r : mudarOpcoes(r, { semestreInicial: inicioDoPlano(null) });
+      const novo = aplicarPlano(comInicio, a.op);
+      if (a.op.tipo !== 'mover') return { ...e, registro: novo };
+      const codigo = r.plano.semestres[a.op.indice]?.codigos[a.op.posicao];
+      if (codigo === undefined || novo === comInicio || novo.plano.semestres === comInicio.plano.semestres) return e;
+      const inicio = inicioDoPlano(comInicio.opcoes.semestreInicial);
+      return com(e, novo, mensagemMover(codigo, rotuloSemestre(inicio, a.op.indice + 1), rotuloSemestre(inicio, a.op.para + 1)));
+    }
     case 'aba':
       return { ...e, aba: a.aba };
     case 'importar':

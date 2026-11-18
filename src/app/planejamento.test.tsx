@@ -61,9 +61,9 @@ describe('planejamento', () => {
     render(<App />);
     await abrirPlanejamento(u);
     // Com o plano vazio, a nota sobre sugestões ainda não aparece (só faz sentido com semestres)
-    expect(screen.queryByText(/Sugestão automática: as disciplinas que mais liberam outras do curso/)).toBeNull();
+    expect(screen.queryByText(/Sugestão da ferramenta, não considera a oferta de turmas/)).toBeNull();
     await adicionarSemestre(u);
-    expect(screen.getByText(/Sugestão automática: as disciplinas que mais liberam outras do curso/)).toBeTruthy();
+    expect(screen.getByText(/Sugestão da ferramenta, não considera a oferta de turmas/)).toBeTruthy();
     expect(screen.getByRole('heading', { name: '2027.1 (próximo)' })).toBeTruthy();
     await adicionar(u, 1, 'MTM3110');
     const s1 = within(semestre(1));
@@ -242,11 +242,13 @@ describe('planejamento', () => {
 });
 
 describe('aviso da sugestão', () => {
-  it('diz que não verifica conflito de horário nem a oferta do semestre', async () => {
+  it('diz que é sugestão da ferramenta, que não considera a oferta de turmas (optativas em .1 ou .2) nem horário', async () => {
     const u = userEvent.setup();
     render(<App />);
     await abrirPlanejamento(u);
     await adicionarSemestre(u);
-    expect(screen.getByText(/Não verifica conflito de horário nem a oferta do semestre/)).toBeTruthy();
+    const aviso = screen.getByText(/Sugestão da ferramenta, não considera a oferta de turmas/);
+    expect(aviso.textContent).toMatch(/optativas costumam ser oferecidas só em um dos semestres \(\.1 ou \.2\)/);
+    expect(aviso.textContent).toMatch(/não há verificação de horário/);
   });
 });

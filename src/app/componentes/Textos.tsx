@@ -52,9 +52,11 @@ export function TextoAjuda() {
       <p>
         Na aba &quot;Planejamento&quot;, monte os próximos semestres: adicione semestres, escolha disciplinas entre as
         que já podem ser cursadas naquele ponto do plano e veja, em cada semestre, o que falta, os créditos somados e os
-        avisos de carga. O botão &quot;Sugerir&quot; preenche o semestre automaticamente por fase e por quantas
-        disciplinas cada uma libera; é só uma ajuda, confira com a coordenação e o CAGR. A integralização projetada
-        mostra o progresso ao fim do plano.
+        avisos de carga. &quot;Montar pela grade oficial&quot; segue as fases do currículo a partir da sua fase; &quot;Montar plano
+        otimizado&quot; e o botão &quot;Sugerir&quot; escolhem as disciplinas que mais liberam outras do curso. São sugestões da
+        ferramenta, que não consideram a oferta de turmas (as optativas costumam ser oferecidas só em .1 ou só em .2):
+        confira com a coordenação e o CAGR. Para mudar uma disciplina de semestre, arraste o cartão ou use &quot;Mover
+        para…&quot;. A integralização projetada mostra o progresso ao fim do plano.
       </p>
       <h3>Salvar, exportar e importar</h3>
       <p>

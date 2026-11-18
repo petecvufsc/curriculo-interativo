@@ -2,6 +2,8 @@
 export { aulasNoLimite } from './aulasNoLimite';
 export { avaliarPlano } from './avaliarPlano';
 export { baseDoSemestre } from './baseSemestre';
+export { faseAtualDe, montarGradeOficial } from './gradeOficial';
+export type { ResultadoGradeOficial } from './gradeOficial';
 export { LIMITE_SEMESTRES_PADRAO, montarPlano } from './montarPlano';
 export type { ResultadoMontagem } from './montarPlano';
 export { motorEm } from './motorPorSemestre';

@@ -22,4 +22,4 @@ export function textoDoAviso(a: AvisoSemestre): string {
 }
 
 export const ROTULO_SUGESTAO =
-  'Sugestão automática: as disciplinas que mais liberam outras do curso, na quantidade que você definiu. Não verifica conflito de horário nem a oferta do semestre — confira no CAGR e com a coordenação.';
+  'Sugestão da ferramenta, não considera a oferta de turmas: o "Sugerir" e o plano otimizado escolhem as disciplinas que mais liberam outras do curso, na quantidade que você definiu. As optativas costumam ser oferecidas só em um dos semestres (.1 ou .2) e não há verificação de horário — confira no CAGR e com a coordenação.';

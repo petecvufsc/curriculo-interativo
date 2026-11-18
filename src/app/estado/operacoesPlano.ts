@@ -7,7 +7,9 @@ export type OperacaoPlano =
   | { tipo: 'adicionar'; indice: number; codigo: string }
   | { tipo: 'remover'; indice: number; posicao: number }
   | { tipo: 'substituir'; indice: number; codigos: string[] }
-  | { tipo: 'definirPlano'; semestres: string[][] };
+  | { tipo: 'definirPlano'; semestres: string[][] }
+  /** Move a disciplina na posição `posicao` do semestre `indice` para o fim do semestre `para`. */
+  | { tipo: 'mover'; indice: number; posicao: number; para: number };
 
 function aplicar(semestres: SemestrePlano[], op: OperacaoPlano): SemestrePlano[] {
   const trocar = (indice: number, f: (codigos: string[]) => string[]) =>
@@ -27,6 +29,16 @@ function aplicar(semestres: SemestrePlano[], op: OperacaoPlano): SemestrePlano[]
       return trocar(op.indice, () => op.codigos);
     case 'definirPlano':
       return op.semestres.map((codigos) => ({ codigos: [...codigos] }));
+    case 'mover': {
+      const codigo = semestres[op.indice]?.codigos[op.posicao];
+      // Origem ou destino inexistente, ou destino igual à origem: nada muda
+      if (codigo === undefined || !semestres[op.para] || op.para === op.indice) return semestres;
+      return semestres.map((s, i) => {
+        if (i === op.indice) return { codigos: s.codigos.filter((_, p) => p !== op.posicao) };
+        if (i === op.para) return { codigos: [...s.codigos, codigo] };
+        return s;
+      });
+    }
   }
 }
 

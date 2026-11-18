@@ -36,6 +36,13 @@ export function mensagemFase(fase: number, marcada: boolean, antes: RegistroAlun
   return marcada ? `${quantas} na ${fase}ª Fase, com os pré-requisitos.` : `${quantas} na ${fase}ª Fase e nas que dependiam delas.`;
 }
 
+/** Disciplina movida de um semestre do plano para outro (com "Desfazer"). `rotulo` = nome real do semestre ("2027.2"). */
+export function mensagemMover(codigo: string, rotuloOrigem: string | null, rotuloDestino: string | null): string {
+  return rotuloOrigem && rotuloDestino
+    ? `${nome(codigo)}: movida de ${rotuloOrigem} para ${rotuloDestino}.`
+    : `${nome(codigo)}: movida para outro semestre.`;
+}
+
 /** Mudança de situação no histórico (o bloco de detalhes costuma ficar fora da tela, longe do cartão). */
 export function mensagemStatus(codigo: string, status: StatusEditavel): string {
   return `${nome(codigo)}: situação alterada para ${ROTULO_STATUS[status]}.`;
