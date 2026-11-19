@@ -13,15 +13,42 @@ function Totais({ rotulo, t }: { rotulo: string; t: TotaisHoras }) {
   );
 }
 
-export function PainelLateral({ e }: { e: EstadoAluno }) {
+/** Abaixo de 1620 px o painel vira gaveta: fechada, some da tela e do teclado (`inert`); aberta, tem o botão Fechar. */
+export interface Gaveta {
+  aberta: boolean;
+  onFechar: () => void;
+}
+
+export function PainelLateral({ e, gaveta }: { e: EstadoAluno; gaveta?: Gaveta }) {
   const { simulacao: s, progresso: p, dispatch } = e;
   const limparSelecao = () => {
     // Os dados agora ficam salvos no navegador: pede confirmação antes de apagar.
     if (window.confirm('Limpar todas as disciplinas marcadas (inclusive as de outro currículo)? O plano de semestres é mantido.'))
       dispatch({ tipo: 'limparSelecao' });
   };
+  const classe = ['painel', gaveta && 'gaveta', gaveta?.aberta && 'aberta'].filter(Boolean).join(' ');
   return (
-    <aside id="painel" className="painel" aria-label="Resumo e ações" tabIndex={-1}>
+    <aside
+      id="painel"
+      className={classe}
+      aria-label="Resumo e ações"
+      tabIndex={-1}
+      inert={gaveta ? !gaveta.aberta : undefined}
+      onKeyDown={(ev) => {
+        if (gaveta?.aberta && ev.key === 'Escape') {
+          ev.stopPropagation();
+          gaveta.onFechar();
+        }
+      }}
+    >
+      {gaveta && (
+        <div className="gaveta-topo">
+          <p className="gaveta-titulo">Resumo e ações</p>
+          <button type="button" className="botao pequeno" onClick={gaveta.onFechar}>
+            Fechar <span aria-hidden="true">×</span>
+          </button>
+        </div>
+      )}
       {/* Só aparece depois de "Simular": antes disso não há nada a mostrar, e a dica fica junto do botão */}
       <section aria-labelledby="titulo-disponiveis" aria-live="polite" hidden={!e.simulou}>
         <h2 id="titulo-disponiveis">Disciplinas disponíveis</h2>

@@ -3,21 +3,30 @@ import { formatarPercentual } from '../estado/formato';
 import { porCodigo } from '../estado/motorEcv';
 
 /**
- * Barra fixa no rodapé, só na aba Grade e em telas estreitas (< 1620 px; ver CSS). Nelas o painel fica abaixo da
- * grade, a milhares de pixels de distância; a barra mantém "Simular" e o acesso aos detalhes à mão.
+ * Barra de ações rápidas, em telas abaixo de 1620 px (ver CSS), onde o painel vira gaveta. Do notebook ao tablet
+ * (768 px ou mais) fica fixa no topo; no celular, fixa embaixo. O botão abre e fecha a gaveta do painel.
  */
-export function BarraAcoes({ e }: { e: EstadoAluno }) {
+export function BarraAcoes({ e, painelAberto, onAlternarPainel }: { e: EstadoAluno; painelAberto: boolean; onAlternarPainel: () => void }) {
   const nome = e.selecionada ? porCodigo.get(e.selecionada)?.nome : null;
   const pct = e.progresso.geral.percentual;
   return (
     <nav className="barra-acoes" aria-label="Ações rápidas">
-      <button type="button" className="botao primario" onClick={() => e.dispatch({ tipo: 'simular' })}>
-        Simular
-      </button>
+      {e.aba === 'grade' && (
+        <button type="button" className="botao primario" onClick={() => e.dispatch({ tipo: 'simular' })}>
+          Simular
+        </button>
+      )}
       {pct !== null && <span className="barra-resumo">{formatarPercentual(pct)}% integralizado</span>}
-      <a className="botao barra-acoes-detalhes" href="#painel">
-        {nome ? `Detalhes: ${nome}` : 'Resumo e detalhes'} ↓
-      </a>
+      <button
+        type="button"
+        id="botao-painel"
+        className="botao barra-acoes-detalhes"
+        aria-expanded={painelAberto}
+        aria-controls="painel"
+        onClick={onAlternarPainel}
+      >
+        {nome ? `Detalhes: ${nome}` : 'Resumo e ações'}
+      </button>
     </nav>
   );
 }

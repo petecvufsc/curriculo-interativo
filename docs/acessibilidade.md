@@ -39,6 +39,6 @@ Depois do redesenho para a linha sóbria (sem hachura, sem fontes de título), a
 - **Contraste de texto:** uma falha encontrada e corrigida (selo "Pré-requisito indireto", 3,96:1, agora 5,05:1). Pior caso atual: 5,05:1 no tema claro e 5,23:1 no escuro.
 - **Nomes sem quebra:** zero palavras estouradas em 320, 800, 1100, 1280, 1366, 1440 e 1920 px. A fonte do nome varia de 11,8 a 14,5 px (em 1366 px fica em torno de 11,8 px; não há mínimo de tamanho na WCAG, mas é o ponto mais fraco para leitura).
 - **Alvos de toque no celular:** nenhum abaixo de 44 px; nenhum abaixo de 24 px em nenhuma tela.
-- **Painel ao lado:** a partir de 1620 px (o valor de 1700 px citado acima era da versão anterior).
+- **Painel ao lado:** a partir de 1620 px (o valor de 1700 px citado acima era da versão anterior). Abaixo disso, gaveta não modal: botão com `aria-expanded`/`aria-controls`, foco levado à gaveta ao abrir pelo botão e devolvido ao fechar, Esc fecha, `inert` quando fechada.
 - **Orientação (revisão de UX/UI):** dica dos dois gestos do cartão, legenda completa acima da grade, Ajuda e Sobre no cabeçalho, aviso `role="status"` com Desfazer quando a cascata mexe em várias disciplinas.
 - **Ainda não testado:** leitor de tela real, axe/Lighthouse e modo de alto contraste do Windows.

@@ -64,15 +64,23 @@ A página nunca tem rolagem horizontal.
 | Largura | Layout |
 |---|---|
 | ≥ 1620 px | 10 colunas e painel lateral de 290 px, fixo (sticky) à direita. |
-| 1100–1619 px | Até 10 colunas em toda a largura (mínimo de 125 px cada); o painel fica sob a grade, em colunas. |
-| 700–1099 px | Fases em grade que quebra linha, em ordem; painel sob a grade. |
-| < 700 px | Fases empilhadas, margem de 16 px, painel abaixo. |
+| 1100–1619 px | Até 10 colunas em toda a largura (mínimo de 125 px cada). Painel em **gaveta à direita** (400 px), aberta pelo botão da barra fixa no topo. |
+| 768–1099 px | Fases em grade que quebra linha, em ordem; mesma gaveta à direita e barra no topo. |
+| < 768 px | Fases empilhadas, margem de 16 px; barra fixa **embaixo** e painel em gaveta que **sobe de baixo** (até 85% da altura). |
+
+**Gaveta do painel (< 1620 px).** Antes o painel caía para depois da grade inteira e, em notebooks (1366–1536 px), ficava escondido. Agora:
+- O botão **"Resumo e ações"** (ou **"Detalhes: <disciplina>"**) fica sempre à vista na barra de ações, nas duas abas, com `aria-expanded`. Abrir por ele leva o foco para a gaveta.
+- Em notebook e tablet (≥ 768 px), **clicar no nome de uma disciplina abre a gaveta já no detalhe dela**, sem tirar o foco da grade. No celular, não abre sozinha (cobriria a grade).
+- A gaveta **não é modal**: cobre só a faixa da direita, para os destaques de pré-requisito continuarem visíveis, e a grade segue clicável (escolher outra disciplina atualiza o detalhe).
+- Fecha com **Fechar**, com **Esc** (com o foco na gaveta ou na grade) ou pelo mesmo botão; o foco volta ao botão. Fechada, fica fora da tela e do teclado (`inert`).
+- O atalho "Pular para o resumo e as ações" abre a gaveta.
+- Os pontos de corte ficam em `src/app/estado/useMidia.ts` e precisam bater com `base.css` e `painel.css`.
 
 - **Cabeçalho:** título, **Ajuda** e **Sobre** (antes ficavam no fim do painel, a mais de 1500 px do topo).
 - **Acima da grade (aba Grade):** uma linha que explica os dois gestos do cartão ("clique no **nome** para ver pré-requisitos; marque a **caixa** das que você já cursou") e a **legenda**, com as mesmas seis cores do programa original (Selecionada, Pré-requisito direto e indireto, Tranca diretamente e indiretamente, Disponível), sem símbolos. Sai do rodapé, onde ninguém a via. Cursada, Cursando, Reprovada, Planejada e "alternativa" não entram na legenda: já vêm escritos nos próprios cartões.
 - **Aviso de ação:** quando marcar ou desmarcar mexe em várias disciplinas ("Marquei também 19 pré-requisitos de…"), ou quando se muda a situação no histórico, um aviso acompanha a rolagem e oferece **Desfazer**. O desfazer some se o plano, as opções ou o histórico inteiro mudarem depois, porque restauraria o registro antigo por cima.
 - **Cartão:** o nome ocupa a largura toda; a caixa fica na linha do código, logo abaixo. As horas-aula ficam nos detalhes e nos totais.
-- **Barra de ações (aba Grade, < 1620 px):** "Simular", o total de horas-aula cursadas e o atalho "Detalhes: <disciplina> ↓" para o painel. Some na aba Planejamento.
+- **Barra de ações (< 1620 px):** "Simular" (só na aba Grade), o percentual integralizado e o botão que abre a gaveta do painel. No topo de 768 a 1619 px; embaixo no celular.
 - **Botões do painel:** "Limpar seleção" tem estilo de perigo e fica afastado de "Limpar destaques" (um apaga o histórico, o outro só tira as cores). "Remover semestre" pede confirmação quando há disciplinas.
 - **Zoom de 200% e reflow a 320 px:** sem rolagem horizontal.
 

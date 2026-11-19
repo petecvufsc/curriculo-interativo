@@ -70,6 +70,33 @@
   .painel { display: flex; width: 290px; flex: none; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
   .painel > * { border-right: 0; }
 }
+
+/*
+ * Gaveta (abaixo de 1620 px). Notebook e tablet: sai pela direita, sem cobrir a grade inteira, para que os destaques
+ * de pré-requisito continuem visíveis à esquerda. Celular: sobe de baixo. Fechada, não aparece nem recebe foco.
+ */
+.gaveta-topo { display: none; }
+.painel.gaveta:not(.aberta) { display: none; }
+.painel.gaveta.aberta {
+  display: flex; flex-direction: column; position: fixed; z-index: 30; overflow-y: auto; overscroll-behavior: contain;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.28); border-color: var(--borda-forte); animation: gaveta-sobe 0.18s ease-out;
+  left: 0; right: 0; bottom: 0; max-height: 85vh; border-radius: 8px 8px 0 0;
+}
+.painel.gaveta.aberta > * { border-right: 0; }
+.painel.gaveta .gaveta-topo {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  position: sticky; top: 0; z-index: 1; background: var(--superficie); border-bottom: 2px solid var(--verde);
+}
+.gaveta-titulo { font-weight: 700; font-size: 1rem; }
+@keyframes gaveta-sobe { from { transform: translateY(24px); opacity: 0; } }
+@keyframes gaveta-entra { from { transform: translateX(32px); opacity: 0; } }
+@media (min-width: 768px) {
+  .painel.gaveta.aberta {
+    left: auto; top: 0; bottom: 0; width: min(400px, 92vw); max-height: none; border-radius: 0;
+    border-width: 0 0 0 1px; animation-name: gaveta-entra;
+  }
+}
+
 @media (pointer: coarse) {
   .seg-texto { min-height: 48px; }
   .externas summary { min-height: 44px; }

@@ -167,6 +167,26 @@ input[type='checkbox']:indeterminate::after { content: ''; width: 10px; height: 
 .barra-acoes { grid-template-columns: auto auto 1fr; align-items: center; }
 .barra-resumo { font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--texto); }
 @media (max-width: 420px) { .barra-resumo { display: none; } .barra-acoes { grid-template-columns: auto 1fr; } }
+/* O botão do painel fica sempre na última coluna, mesmo sem "Simular" (aba Planejamento) */
+.barra-acoes-detalhes { grid-column: -2 / -1; justify-content: center; }
+
+/*
+ * Abaixo de 1620 px o painel vira gaveta (ver painel.css) e a barra é o caminho até ele.
+ * Celular (< 768 px): barra fixa embaixo, como antes; na ordem visual vai para o fim da página.
+ * Notebook e tablet (768 a 1619 px): barra fixa no topo, logo abaixo do cabeçalho, com o botão à direita.
+ */
+@media (max-width: 767.98px) {
+  .barra-acoes { order: 1; }
+}
+@media (min-width: 768px) and (max-width: 1619.98px) {
+  html { scroll-padding-top: 76px; }
+  .barra-acoes {
+    position: sticky; top: 0; bottom: auto; z-index: 7; padding: 8px 24px;
+    border-top: 0; border-bottom: 1px solid var(--borda-forte); box-shadow: 0 2px 6px rgb(0 0 0 / 0.12);
+  }
+  .barra-acoes-detalhes { justify-self: end; max-width: 26rem; }
+  .mensagem-acao { top: 76px; }
+}
 
 /* Versão das regras de pré-requisito (2020.1 atual, 2028.1 novas) */
 .versao { background: var(--superficie); border: 1px solid var(--borda); border-left: 4px solid var(--verde); border-radius: 4px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.9375rem; box-shadow: var(--sombra); }
