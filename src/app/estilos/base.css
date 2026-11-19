@@ -217,23 +217,35 @@ input[type='checkbox']:indeterminate::after { content: ''; width: 10px; height: 
 }
 @media (min-width: 1100px) and (max-width: 1619.98px) and (hover: hover) and (pointer: fine) {
   #botao-painel { display: none; }
+  /*
+   * A aba NÃO muda de forma sob o cursor. (Antes ela virava uma pílula de 48 px de altura: com o mouse na parte de
+   * cima ou de baixo da aba, o cursor ficava fora da pílula, a aba voltava, o cursor entrava de novo… e piscava.)
+   * Agora a aba fica igual e um rótulo sai dela para a esquerda. O rótulo faz parte do botão: passar o mouse sobre
+   * ele mantém aberto e clicar nele abre a gaveta. Ele some com um pequeno atraso, para não piscar ao roçar a borda.
+   */
   .alca-painel {
     position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-    width: 28px; min-height: 140px; padding: 10px 0;
+    width: 30px; height: 184px; padding: 0;
     cursor: pointer; font: inherit; font-size: 0.875rem; font-weight: 700; white-space: nowrap;
     color: var(--primario-tx); background: var(--primario-bg); border: 0; border-radius: 6px 0 0 6px;
-    box-shadow: -2px 2px 8px rgb(0 0 0 / 0.2);
+    box-shadow: -2px 2px 8px rgb(0 0 0 / 0.2); transition: background-color var(--dur-rapida) linear;
   }
   .alca-painel .icone-painel { width: 18px; height: 18px; }
   .alca-painel-vertical { writing-mode: vertical-rl; transform: rotate(180deg); }
-  .alca-painel-horizontal { display: none; }
-  /* Ao passar o mouse ou focar pelo teclado, a aba se alarga e diz o que faz (Esc recolhe o rótulo: WCAG 1.4.13) */
-  .alca-painel:is(:hover, :focus-visible):not(.recolhida) {
-    flex-direction: row; width: 190px; min-height: 48px; padding: 0 14px; background: var(--primario-bg-hover);
+  .alca-painel-horizontal {
+    position: absolute; right: 100%; top: 50%; display: flex; align-items: center; height: 48px; padding: 0 12px 0 14px;
+    color: var(--primario-tx); background: var(--primario-bg-hover); border-radius: 6px 0 0 6px;
+    box-shadow: -2px 2px 8px rgb(0 0 0 / 0.2);
+    opacity: 0; transform: translate(8px, -50%); pointer-events: none;
+    transition: opacity var(--dur-rapida) linear 150ms, transform var(--dur-rapida) var(--curva-saida) 150ms;
   }
-  .alca-painel:is(:hover, :focus-visible):not(.recolhida) .alca-painel-vertical { display: none; }
-  .alca-painel:is(:hover, :focus-visible):not(.recolhida) .alca-painel-horizontal { display: inline; }
+  /* Ao passar o mouse ou focar pelo teclado, o rótulo aparece (Esc recolhe: WCAG 1.4.13) */
+  .alca-painel:is(:hover, :focus-visible) { background: var(--primario-bg-hover); }
+  .alca-painel:is(:hover, :focus-visible):not(.recolhida) .alca-painel-horizontal {
+    opacity: 1; transform: translate(0, -50%); pointer-events: auto;
+    transition: opacity var(--dur-media) linear, transform var(--dur-media) var(--curva-saida);
+  }
   .alca-painel:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
   /* A dica de primeira visita aponta para a aba, não para o botão escondido */
   .dica-painel { position: fixed; top: 50%; right: 40px; transform: translateY(-50%); }

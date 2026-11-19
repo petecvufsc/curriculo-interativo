@@ -79,7 +79,7 @@
 .painel.gaveta:not(.aberta) { display: none; }
 .painel.gaveta.aberta {
   display: flex; flex-direction: column; position: fixed; z-index: 30; overflow-y: auto; overscroll-behavior: contain;
-  box-shadow: 0 6px 24px rgb(0 0 0 / 0.28); border-color: var(--borda-forte); animation: gaveta-sobe 0.18s ease-out;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.28); border-color: var(--borda-forte); animation: gaveta-sobe var(--dur-media) var(--curva-saida);
   left: 0; right: 0; bottom: 0; max-height: 85vh; border-radius: 8px 8px 0 0;
 }
 .painel.gaveta.aberta > * { border-right: 0; }

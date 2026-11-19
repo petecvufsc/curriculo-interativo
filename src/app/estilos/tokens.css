@@ -42,6 +42,10 @@
   --erro-tinta: #f9dedb;
   --sucesso-tinta: #d9eee2;
   --sombra: 0 1px 2px rgb(20 30 25 / 0.12);
+  /* Movimento: curto e sem "quique". Sair rápido, entrar suave; ninguém espera animação para usar um controle. */
+  --dur-rapida: 120ms;
+  --dur-media: 180ms;
+  --curva-saida: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Decisão do PET: o tema padrão é sempre o claro (como no programa original), mesmo que o aparelho use modo escuro.
