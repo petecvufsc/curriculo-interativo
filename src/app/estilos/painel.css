@@ -90,7 +90,10 @@
 .gaveta-titulo { font-weight: 700; font-size: 1rem; }
 @keyframes gaveta-sobe { from { transform: translateY(24px); opacity: 0; } }
 @keyframes gaveta-entra { from { transform: translateX(32px); opacity: 0; } }
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1099.98px) {
+  .painel.gaveta.aberta { max-height: 55vh; }
+}
+@media (min-width: 1100px) {
   .painel.gaveta.aberta {
     left: auto; top: 0; bottom: 0; width: min(400px, 92vw); max-height: none; border-radius: 0;
     border-width: 0 0 0 1px; animation-name: gaveta-entra;

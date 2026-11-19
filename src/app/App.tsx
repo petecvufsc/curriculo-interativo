@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Abas } from './componentes/Abas';
-import { BarraAcoes } from './componentes/BarraAcoes';
+import { BarraAcoes, IconePainel } from './componentes/BarraAcoes';
 import { Dialogo } from './componentes/Dialogo';
 import { GradeDisciplinas } from './componentes/GradeDisciplinas';
 import { Legenda } from './componentes/Legenda';
@@ -12,7 +12,24 @@ import { VisaoPlanejamento } from './componentes/planejamento/VisaoPlanejamento'
 import { TextoAjuda, TextoSobre } from './componentes/Textos';
 import { formatarDataIso } from './estado/formato';
 import { useEstadoAluno } from './estado/useEstadoAluno';
-import { MIDIA_GAVETA_LATERAL, MIDIA_PAINEL_AO_LADO, useMidia } from './estado/useMidia';
+import { MIDIA_GAVETA_DIREITA, MIDIA_GAVETA_LATERAL, MIDIA_PAINEL_AO_LADO, useMidia } from './estado/useMidia';
+
+/** A dica "Seu resumo… ficam em Resumo e ações" aparece uma vez por navegador. */
+const CHAVE_DICA_PAINEL = 'curriculo-interativo:dica-painel-vista';
+function lerDicaVista(): boolean {
+  try {
+    return localStorage.getItem(CHAVE_DICA_PAINEL) === '1';
+  } catch {
+    return false;
+  }
+}
+function gravarDicaVista() {
+  try {
+    localStorage.setItem(CHAVE_DICA_PAINEL, '1');
+  } catch {
+    // Sem armazenamento a dica volta na próxima visita; nada mais muda.
+  }
+}
 
 export function App() {
   const e = useEstadoAluno();
@@ -20,14 +37,21 @@ export function App() {
   // Abaixo de 1620 px o painel não cabe ao lado da grade (10 colunas com nomes inteiros) e vira gaveta.
   const aoLado = useMidia(MIDIA_PAINEL_AO_LADO, true);
   const gavetaLateral = useMidia(MIDIA_GAVETA_LATERAL, true);
+  const gavetaDireita = useMidia(MIDIA_GAVETA_DIREITA, true);
   const emGaveta = !aoLado;
   const [painelAberto, setPainelAberto] = useState(false);
   const aberta = emGaveta && painelAberto;
   const focarPainel = useRef(false);
+  const [dicaVista, setDicaVista] = useState(lerDicaVista);
+  const dispensarDica = () => {
+    setDicaVista(true);
+    gravarDicaVista();
+  };
 
   const abrirPainel = (focar: boolean) => {
     focarPainel.current = focar;
     setPainelAberto(true);
+    if (!dicaVista) dispensarDica();
   };
   const fecharPainel = () => {
     setPainelAberto(false);
@@ -55,9 +79,20 @@ export function App() {
   // No celular, não: a gaveta cobriria a grade; o botão da barra passa a dizer "Detalhes: <nome>".
   const selecionadaAntes = useRef(e.selecionada);
   useEffect(() => {
-    if (e.selecionada && e.selecionada !== selecionadaAntes.current && emGaveta && gavetaLateral) setPainelAberto(true);
+    const nova = e.selecionada && e.selecionada !== selecionadaAntes.current;
     selecionadaAntes.current = e.selecionada;
-  }, [e.selecionada, emGaveta, gavetaLateral]);
+    if (!nova || !emGaveta || !gavetaLateral) return;
+    setPainelAberto(true);
+    // Quem viu a gaveta abrir já sabe que ela existe: a dica de primeira visita não volta.
+    setDicaVista(true);
+    gravarDicaVista();
+    // De 768 a 1099 px a gaveta ocupa a metade de baixo da tela: rola a página para a disciplina clicada ficar acima dela.
+    if (!gavetaDireita) {
+      const cartao = document.querySelector<HTMLElement>(`#painel-grade [data-codigo="${e.selecionada}"]`);
+      const r = cartao?.getBoundingClientRect();
+      if (r && (r.top < 80 || r.bottom > window.innerHeight * 0.42)) window.scrollBy({ top: r.top - 90 });
+    }
+  }, [e.selecionada, emGaveta, gavetaLateral, gavetaDireita]);
 
   // Esc fecha a gaveta mesmo com o foco na grade (a gaveta não é modal), desde que nenhum diálogo esteja aberto.
   useEffect(() => {
@@ -103,7 +138,23 @@ export function App() {
           </button>
         </div>
       </header>
-      <BarraAcoes e={e} painelAberto={aberta} onAlternarPainel={() => (aberta ? fecharPainel() : abrirPainel(true))} />
+      <BarraAcoes
+        e={e}
+        painelAberto={aberta}
+        onAlternarPainel={() => (aberta ? fecharPainel() : abrirPainel(true))}
+        avisarDetalhe={!gavetaLateral}
+        mostrarDica={emGaveta && !dicaVista && !aberta}
+        onDispensarDica={dispensarDica}
+      />
+      {/* Alça na borda direita (1100 a 1619 px; ver CSS): mostra que existe um painel. Para mouse; no teclado e no
+          leitor de tela o caminho é o botão da barra, por isso fica fora da ordem de foco. */}
+      {emGaveta && gavetaDireita && !aberta && (
+        <button type="button" className="alca-painel" tabIndex={-1} aria-hidden="true" onClick={() => abrirPainel(true)}>
+          <IconePainel />
+          <span className="alca-painel-curto">Resumo</span>
+          <span className="alca-painel-longo">Abrir resumo e ações</span>
+        </button>
+      )}
       <div className="corpo">
         <main className="principal" id="conteudo" tabIndex={-1}>
           {e.naoSalvou && (

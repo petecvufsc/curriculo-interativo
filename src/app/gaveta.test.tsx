@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 const painel = () => document.getElementById('painel') as HTMLElement;
-const botaoPainel = () => screen.getByRole('button', { name: /^(Resumo e ações|Detalhes: )/ });
+const botaoPainel = () => document.getElementById('botao-painel') as HTMLElement;
 
 describe('notebook (1366 px)', () => {
   beforeEach(() => simularLargura(1366));
@@ -78,8 +78,45 @@ describe('notebook (1366 px)', () => {
     await u.click(nome);
     expect(painel().className).toMatch(/aberta/);
     expect(within(painel()).getAllByText(/Cálculo 1/).length).toBeGreaterThan(0);
-    expect(botaoPainel().textContent).toMatch(/Detalhes: Cálculo 1/);
+    // Rótulo estável: o botão não muda de nome (a gaveta já abriu sozinha no detalhe)
+    expect(botaoPainel().textContent).toBe('Resumo e ações');
     expect(painel().contains(document.activeElement)).toBe(false);
+    expect(document.activeElement).toBe(nome);
+    // A gaveta abriu sozinha: a dica de primeira visita não volta depois de fechar
+    await u.keyboard('{Escape}');
+    expect(screen.queryByRole('note')).toBeNull();
+  });
+
+  it('mostra a alça na borda direita, que abre a gaveta e some enquanto ela está aberta', async () => {
+    const u = userEvent.setup();
+    render(<App />);
+    const alca = document.querySelector('.alca-painel') as HTMLElement;
+    expect(alca).toBeTruthy();
+    expect(alca.getAttribute('aria-hidden')).toBe('true');
+    expect(alca.tabIndex).toBe(-1);
+    await u.click(alca);
+    expect(painel().className).toMatch(/aberta/);
+    expect(document.querySelector('.alca-painel')).toBeNull();
+  });
+
+  it('dica de primeira visita: aparece, "Entendi" a dispensa e ela não volta ao recarregar', async () => {
+    const u = userEvent.setup();
+    const { unmount } = render(<App />);
+    const dica = () => screen.queryByRole('note');
+    expect(dica()?.textContent).toMatch(/Exportar.*Importar.*Resumo e ações/);
+    await u.click(screen.getByRole('button', { name: 'Entendi' }));
+    expect(dica()).toBeNull();
+    unmount();
+    render(<App />);
+    expect(dica()).toBeNull();
+  });
+
+  it('abrir a gaveta também dispensa a dica', async () => {
+    const u = userEvent.setup();
+    render(<App />);
+    await u.click(botaoPainel());
+    await u.click(within(painel()).getByRole('button', { name: /Fechar/ }));
+    expect(screen.queryByRole('note')).toBeNull();
   });
 
   it('o atalho "Pular para o resumo e as ações" abre a gaveta', async () => {
@@ -101,16 +138,40 @@ describe('notebook (1366 px)', () => {
   });
 });
 
+describe('tablet (900 px)', () => {
+  beforeEach(() => simularLargura(900));
+
+  it('sem alça; escolher uma disciplina abre a gaveta e rola a página para a disciplina ficar acima dela', async () => {
+    const u = userEvent.setup();
+    const rolar = vi.fn();
+    vi.stubGlobal('scrollBy', rolar);
+    render(<App />);
+    expect(document.querySelector('.alca-painel')).toBeNull();
+    const nome = screen.getAllByRole('button', { name: /Cálculo 1/ })[0];
+    const cartao = nome.closest('[data-codigo]') as HTMLElement;
+    vi.spyOn(cartao, 'getBoundingClientRect').mockReturnValue({ top: 700, bottom: 780 } as DOMRect);
+    await u.click(nome);
+    expect(painel().className).toMatch(/aberta/);
+    expect(rolar).toHaveBeenCalledWith({ top: 610 });
+  });
+});
+
 describe('celular (375 px)', () => {
   beforeEach(() => simularLargura(375));
 
-  it('escolher uma disciplina não abre a gaveta (cobriria a grade); o botão passa a dizer "Detalhes: <nome>"', async () => {
+  it('escolher uma disciplina não abre a gaveta (cobriria a grade); o botão passa a dizer "Ver detalhe da disciplina"', async () => {
     const u = userEvent.setup();
     render(<App />);
     await u.click(screen.getAllByRole('button', { name: /Cálculo 1/ })[0]);
     expect(painel().className).not.toMatch(/aberta/);
-    await u.click(botaoPainel());
+    const botao = screen.getByRole('button', { name: 'Ver detalhe da disciplina' });
+    await u.click(botao);
     expect(painel().className).toMatch(/aberta/);
+  });
+
+  it('a barra mantém a porcentagem', () => {
+    render(<App />);
+    expect(within(screen.getByRole('navigation', { name: 'Ações rápidas' })).getByText(/^\d+,\d%/)).toBeTruthy();
   });
 });
 

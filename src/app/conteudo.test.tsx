@@ -182,22 +182,23 @@ describe('orientação na tela', () => {
 describe('integralização do curso (%)', () => {
   const caixa = (nome: string) => screen.getByLabelText(`Marcar ${nome} como cursada`) as HTMLInputElement;
   const barra = () => screen.getByRole('progressbar', { name: 'Integralização do curso' });
+  const resumo = () => document.querySelector('.resumo-integralizacao') as HTMLElement;
 
   it('mostra 0 % de 4.518 h-a no começo, na grade e no planejamento', async () => {
     const u = userEvent.setup();
     render(<App />);
-    expect(screen.getByText('0,0%')).toBeTruthy();
+    expect(within(resumo()).getByText('0,0%')).toBeTruthy();
     expect(screen.getByText('0 de 4.518 h-a')).toBeTruthy();
     expect(barra().getAttribute('aria-valuenow')).toBe('0');
     await u.click(screen.getByRole('tab', { name: 'Planejamento' }));
-    expect(screen.getByText('0,0%')).toBeTruthy();
+    expect(within(resumo()).getByText('0,0%')).toBeTruthy();
   });
 
   it('sobe ao marcar disciplinas: Física I (72 h-a) = 1,6 %', async () => {
     const u = userEvent.setup();
     render(<App />);
     await u.click(caixa('Física I'));
-    expect(screen.getByText('1,6%')).toBeTruthy();
+    expect(within(resumo()).getByText('1,6%')).toBeTruthy();
     expect(screen.getByText('72 de 4.518 h-a')).toBeTruthy();
     expect(barra().getAttribute('aria-valuetext')).toBe('1,6% do curso integralizado');
   });
@@ -206,7 +207,7 @@ describe('integralização do curso (%)', () => {
     const u = userEvent.setup();
     render(<App />);
     await u.click(caixa('Física I'));
-    expect(within(screen.getByRole('navigation', { name: 'Ações rápidas' })).getByText('1,6% integralizado')).toBeTruthy();
+    expect(screen.getByRole('navigation', { name: 'Ações rápidas' }).textContent).toContain('1,6% integralizado');
   });
 
   it('não soma as optativas além das 432 h-a (limite do curso)', async () => {
@@ -216,6 +217,6 @@ describe('integralização do curso (%)', () => {
     for (let f = 1; f <= 10; f++) await u.click(screen.getByLabelText(`Marcar todas as disciplinas obrigatórias da ${f}ª Fase`));
     const optativas = ['Construção Pré-Fabricada', 'Instalações Prediais Especiais', 'Métodos de elementos Finitos', 'Projeto de Estruturas em Concreto Armado', 'Projeto de Estruturas de Pontes', 'Estabilidade de Taludes', 'Obras de terra', 'Tecnologia de Concretos', 'Projeto de Fundações'];
     for (const n of optativas) await u.click(caixa(n));
-    expect(screen.getByText('100,0%')).toBeTruthy();
+    expect(within(resumo()).getByText('100,0%')).toBeTruthy();
   });
 });

@@ -166,7 +166,57 @@ input[type='checkbox']:indeterminate::after { content: ''; width: 10px; height: 
 /* Resumo na barra fixa: os totais ficam no painel, longe da vista em telas estreitas */
 .barra-acoes { grid-template-columns: auto auto 1fr; align-items: center; }
 .barra-resumo { font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--texto); }
-@media (max-width: 420px) { .barra-resumo { display: none; } .barra-acoes { grid-template-columns: auto 1fr; } }
+/* No celular estreito fica só o número ("12%"): o progresso não some da barra */
+@media (max-width: 420px) { .barra-resumo-longo { display: none; } }
+
+/* Botão do painel: verde contornado, com ícone, para não sumir no branco da barra (o "Simular" é o verde cheio) */
+.botao-painel {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+  color: var(--verde-escuro); background: var(--sucesso-tinta); border: 2px solid var(--verde);
+}
+.botao-painel:hover { background: var(--superficie-2); border-color: var(--verde-escuro); }
+.botao-painel[aria-expanded='true'] { background: var(--primario-bg); color: var(--primario-tx); border-color: var(--primario-bg); }
+.icone-painel { flex: none; }
+
+/* Dica de primeira visita, ligada ao botão do painel */
+.barra-acoes { position: sticky; }
+.dica-painel {
+  position: absolute; right: 16px; top: calc(100% + 10px); z-index: 8; width: min(340px, calc(100vw - 32px));
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 10px 12px; font-size: 0.9375rem;
+  background: var(--superficie); color: var(--texto); border: 2px solid var(--verde); border-radius: 6px; box-shadow: 0 4px 14px rgb(0 0 0 / 0.2);
+}
+.dica-painel p { align-self: stretch; }
+.dica-painel::before {
+  content: ''; position: absolute; right: 28px; top: -9px; width: 14px; height: 14px; transform: rotate(45deg);
+  background: var(--superficie); border-left: 2px solid var(--verde); border-top: 2px solid var(--verde);
+}
+@media (max-width: 767.98px) {
+  .dica-painel { top: auto; bottom: calc(100% + 10px); }
+  .dica-painel::before { top: auto; bottom: -9px; transform: rotate(225deg); }
+}
+
+/* Alça na borda direita (1100 a 1619 px): mostra que há um painel; ao passar o mouse, se alarga e diz o que faz */
+.alca-painel { display: none; }
+@media (min-width: 1100px) and (max-width: 1619.98px) {
+  /* Espaço para a alça sem tirar a 10ª coluna em 1366 px: 1304 px de grade + 12 + 31 = 1347 px */
+  .corpo { padding-right: 31px; }
+  .alca-painel {
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; width: 28px; padding: 12px 0;
+    cursor: pointer; font: inherit; font-size: 0.875rem; font-weight: 700;
+    color: var(--primario-tx); background: var(--primario-bg); border: 0; border-radius: 6px 0 0 6px;
+    box-shadow: -2px 2px 8px rgb(0 0 0 / 0.2); transition: width 0.15s ease-out;
+  }
+  .alca-painel .icone-painel { width: 18px; height: 18px; }
+  .alca-painel-curto { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .alca-painel-longo {
+    position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%); white-space: nowrap;
+    padding: 6px 10px; border-radius: 4px; background: var(--primario-bg); color: var(--primario-tx);
+    opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  }
+  .alca-painel:hover { width: 36px; background: var(--primario-bg-hover); }
+  .alca-painel:hover .alca-painel-longo { opacity: 1; }
+}
 /* O botão do painel fica sempre na última coluna, mesmo sem "Simular" (aba Planejamento) */
 .barra-acoes-detalhes { grid-column: -2 / -1; justify-content: center; }
 
