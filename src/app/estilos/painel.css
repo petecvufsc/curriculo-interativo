@@ -76,30 +76,35 @@
  * de pré-requisito continuem visíveis à esquerda. Celular: sobe de baixo. Fechada, não aparece nem recebe foco.
  */
 .gaveta-topo { display: none; }
-.painel.gaveta:not(.aberta) { display: none; }
-.painel.gaveta.aberta {
+/* "saindo": acabou de fechar e ainda desliza para fora por 220 ms (já inerte); depois some de vez */
+.painel.gaveta:not(.aberta):not(.saindo) { display: none; }
+.painel.gaveta:is(.aberta, .saindo) {
   display: flex; flex-direction: column; position: fixed; z-index: 30; overflow-y: auto; overscroll-behavior: contain;
-  box-shadow: 0 6px 24px rgb(0 0 0 / 0.28); border-color: var(--borda-forte); animation: gaveta-sobe var(--dur-media) var(--curva-saida);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.28); border-color: var(--borda-forte);
+  animation: gaveta-sobe var(--dur-gaveta) var(--curva-saida);
   left: 0; right: 0; bottom: 0; max-height: 85vh; border-radius: 8px 8px 0 0;
 }
-.painel.gaveta.aberta > * { border-right: 0; }
+.painel.gaveta.saindo { animation: gaveta-desce var(--dur-gaveta) var(--curva-entrada) forwards; pointer-events: none; }
+.painel.gaveta:is(.aberta, .saindo) > * { border-right: 0; }
 .painel.gaveta .gaveta-topo {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   position: sticky; top: 0; z-index: 1; background: var(--superficie); border-bottom: 2px solid var(--verde);
 }
 .gaveta-titulo { font-weight: 700; font-size: 1rem; }
-@keyframes gaveta-sobe { from { transform: translateY(24px); opacity: 0; } }
-@keyframes gaveta-entra { from { transform: translateX(32px); opacity: 0; } }
+@keyframes gaveta-sobe { from { transform: translateY(100%); } }
+@keyframes gaveta-desce { to { transform: translateY(100%); } }
+@keyframes gaveta-entra { from { transform: translateX(100%); } }
+@keyframes gaveta-sai { to { transform: translateX(100%); } }
 @media (min-width: 768px) and (max-width: 1099.98px) {
-  .painel.gaveta.aberta { max-height: 55vh; }
+  .painel.gaveta:is(.aberta, .saindo) { max-height: 55vh; }
 }
 @media (min-width: 1100px) {
-  .painel.gaveta.aberta {
-    left: auto; top: 0; bottom: 0; width: min(340px, 92vw); max-height: none; border-radius: 0;
+  .painel.gaveta:is(.aberta, .saindo) {
+    left: auto; top: 0; bottom: 0; width: var(--largura-gaveta); max-height: none; border-radius: 0;
     border-width: 0 0 0 1px; animation-name: gaveta-entra;
   }
+  .painel.gaveta.saindo { animation-name: gaveta-sai; }
 }
-
 @media (pointer: coarse) {
   .seg-texto { min-height: 48px; }
   .externas summary { min-height: 44px; }

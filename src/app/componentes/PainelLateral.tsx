@@ -16,6 +16,8 @@ function Totais({ rotulo, t }: { rotulo: string; t: TotaisHoras }) {
 /** Abaixo de 1620 px o painel vira gaveta: fechada, some da tela e do teclado (`inert`); aberta, tem o botão Fechar. */
 export interface Gaveta {
   aberta: boolean;
+  /** Acabou de fechar: continua desenhada por um instante, deslizando para fora (já fora do teclado). */
+  saindo?: boolean;
   onFechar: () => void;
 }
 
@@ -26,7 +28,7 @@ export function PainelLateral({ e, gaveta }: { e: EstadoAluno; gaveta?: Gaveta }
     if (window.confirm('Limpar todas as disciplinas marcadas (inclusive as de outro currículo)? O plano de semestres é mantido.'))
       dispatch({ tipo: 'limparSelecao' });
   };
-  const classe = ['painel', gaveta && 'gaveta', gaveta?.aberta && 'aberta'].filter(Boolean).join(' ');
+  const classe = ['painel', gaveta && 'gaveta', gaveta?.aberta && 'aberta', gaveta?.saindo && 'saindo'].filter(Boolean).join(' ');
   return (
     <aside
       id="painel"

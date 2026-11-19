@@ -2,7 +2,7 @@
 // Painel em gaveta abaixo de 1620 px: notebook/tablet (gaveta à direita, abre ao escolher disciplina) e celular
 // (gaveta de baixo, só pelo botão). A tela larga continua com o painel ao lado (coberta pelos demais testes).
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
 import { fixarHoje } from './testeAuxiliar';
@@ -88,30 +88,34 @@ describe('notebook (1366 px)', () => {
     expect(screen.queryByRole('note')).toBeNull();
   });
 
-  it('a aba da borda é um botão de verdade (teclado e leitor de tela), abre a gaveta e some enquanto ela está aberta', async () => {
+  it('a aba da borda é um botão de verdade que abre e fecha a gaveta, presa a ela (vira "Fechar")', async () => {
     const u = userEvent.setup();
     render(<App />);
-    expect(alca().getAttribute('aria-hidden')).toBeNull();
     expect(alca().tabIndex).toBe(0);
     expect(alca().getAttribute('aria-expanded')).toBe('false');
     expect(alca().getAttribute('aria-controls')).toBe('painel');
-    expect(screen.getAllByRole('button', { name: 'Resumo e ações' }).length).toBeGreaterThan(0);
+    expect(alca().textContent).toMatch(/Resumo e ações/);
     alca().focus();
     await u.keyboard('{Enter}');
     expect(painel().className).toMatch(/aberta/);
     expect(document.activeElement).toBe(painel());
-    expect(document.getElementById('alca-painel')).toBeNull();
+    // A aba continua na tela, agora para fechar
+    expect(alca().getAttribute('aria-expanded')).toBe('true');
+    expect(alca().textContent).toMatch(/Fechar/);
+    await u.click(alca());
+    expect(painel().className).not.toMatch(/aberta/);
+    expect(document.activeElement).toBe(alca());
   });
 
-  it('Esc com o foco na aba recolhe o rótulo expandido, sem abrir nada', async () => {
+  it('ao fechar, a gaveta fica um instante "saindo" (desliza para fora), já fora do teclado, e depois some', async () => {
     const u = userEvent.setup();
     render(<App />);
-    alca().focus();
-    await u.keyboard('{Escape}');
-    expect(alca().classList.contains('recolhida')).toBe(true);
-    expect(painel().className).not.toMatch(/aberta/);
+    await u.click(alca());
+    await u.click(alca());
+    expect(painel().className).toMatch(/saindo/);
+    expect(painel().hasAttribute('inert')).toBe(true);
+    await waitFor(() => expect(painel().className).not.toMatch(/saindo/));
   });
-
   it('gaveta aberta: a página ganha a classe que reserva o espaço dela e a barra troca "Simular" pelas setas', async () => {
     const u = userEvent.setup();
     render(<App />);

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Abas } from './componentes/Abas';
-import { BarraAcoes, IconePainel } from './componentes/BarraAcoes';
+import { BarraAcoes } from './componentes/BarraAcoes';
 import { Dialogo } from './componentes/Dialogo';
 import { GradeDisciplinas } from './componentes/GradeDisciplinas';
 import { Legenda } from './componentes/Legenda';
@@ -54,12 +54,20 @@ export function App() {
     if (!dicaVista) dispensarDica();
   };
   // Ao fechar, o foco volta para o controle que abre a gaveta e está visível (a aba da borda, no computador com
-  // mouse, ou o botão da barra). A aba só existe com a gaveta fechada, por isso o foco é devolvido depois de renderizar.
+  // mouse, ou o botão da barra), depois de renderizar.
   const devolverFoco = useRef(false);
-  const fecharPainel = () => {
-    devolverFoco.current = true;
+  // Por 220 ms depois de fechar, a gaveta continua desenhada ("saindo") para deslizar para fora junto com a aba.
+  const [saindo, setSaindo] = useState(false);
+  const temporizadorSaida = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(temporizadorSaida.current), []);
+  const fechar = (devolver: boolean) => {
+    devolverFoco.current = devolver;
     setPainelAberto(false);
+    setSaindo(true);
+    clearTimeout(temporizadorSaida.current);
+    temporizadorSaida.current = setTimeout(() => setSaindo(false), 220);
   };
+  const fecharPainel = () => fechar(true);
 
   useEffect(() => {
     if (aberta && focarPainel.current) {
@@ -107,8 +115,7 @@ export function App() {
     if (!aberta) return;
     const tecla = (ev: KeyboardEvent) => {
       if (ev.key === 'Escape' && !document.querySelector('dialog[open]')) {
-        if (document.getElementById('painel')?.contains(document.activeElement)) fecharPainel();
-        else setPainelAberto(false);
+        fechar(!!document.getElementById('painel')?.contains(document.activeElement));
       }
     };
     document.addEventListener('keydown', tecla);
@@ -154,27 +161,23 @@ export function App() {
         mostrarDica={emGaveta && !dicaVista && !aberta}
         onDispensarDica={dispensarDica}
       />
-      {/* Aba da borda direita: em computador com mouse, de 1100 a 1619 px, é o único controle da gaveta (o botão da
-          barra some pelo CSS); fora disso ela some e vale o botão. Ao passar o mouse ou focar pelo teclado, se alarga
-          e mostra "Abrir resumo e ações"; Esc recolhe o rótulo. */}
-      {emGaveta && gavetaDireita && !aberta && (
+      {/* Aba presa à gaveta (como a seta do painel do Google Maps): em computador com mouse, de 1100 a 1619 px, é o
+          único controle da gaveta (o botão da barra e o "Fechar" de dentro somem pelo CSS). Fechada, fica na borda da
+          tela com "‹ Resumo e ações"; aberta, desliza junto com a gaveta, fica presa à borda esquerda dela e vira
+          "› Fechar". Não muda de tamanho ao passar o mouse, só de cor. Fora dessa faixa some e vale o botão da barra. */}
+      {emGaveta && gavetaDireita && (
         <button
           type="button"
           id="alca-painel"
           className="alca-painel"
-          aria-label="Resumo e ações"
-          aria-expanded={false}
+          aria-expanded={aberta}
           aria-controls="painel"
-          onClick={() => abrirPainel(true)}
-          onKeyDown={(ev) => {
-            if (ev.key === 'Escape') ev.currentTarget.classList.add('recolhida');
-          }}
-          onBlur={(ev) => ev.currentTarget.classList.remove('recolhida')}
-          onMouseLeave={(ev) => ev.currentTarget.classList.remove('recolhida')}
+          onClick={() => (aberta ? fecharPainel() : abrirPainel(true))}
         >
-          <IconePainel />
-          <span className="alca-painel-vertical">Resumo e ações</span>
-          <span className="alca-painel-horizontal">Abrir resumo e ações</span>
+          <span className="alca-seta" aria-hidden="true">
+            {aberta ? '›' : '‹'}
+          </span>
+          <span className="alca-painel-vertical">{aberta ? 'Fechar' : 'Resumo e ações'}</span>
         </button>
       )}
       <div className="corpo">
@@ -205,7 +208,7 @@ export function App() {
             {e.aba === 'planejamento' && <VisaoPlanejamento e={e} />}
           </div>
         </main>
-        <PainelLateral e={e} gaveta={emGaveta ? { aberta, onFechar: fecharPainel } : undefined} />
+        <PainelLateral e={e} gaveta={emGaveta ? { aberta, saindo: saindo && !aberta, onFechar: fecharPainel } : undefined} />
       </div>
       <footer className="rodape">
         <p>

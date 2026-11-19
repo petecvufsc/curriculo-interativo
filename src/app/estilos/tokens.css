@@ -46,6 +46,10 @@
   --dur-rapida: 120ms;
   --dur-media: 180ms;
   --curva-saida: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --curva-entrada: cubic-bezier(0.4, 0, 1, 1);
+  /* Gaveta e aba presa a ela se movem juntas, com a mesma duração e curva */
+  --dur-gaveta: 220ms;
+  --largura-gaveta: min(340px, 92vw);
 }
 
 /* Decisão do PET: o tema padrão é sempre o claro (como no programa original), mesmo que o aparelho use modo escuro.
