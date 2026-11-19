@@ -53,16 +53,24 @@ export function App() {
     setPainelAberto(true);
     if (!dicaVista) dispensarDica();
   };
+  // Ao fechar, o foco volta para o controle que abre a gaveta e está visível (a aba da borda, no computador com
+  // mouse, ou o botão da barra). A aba só existe com a gaveta fechada, por isso o foco é devolvido depois de renderizar.
+  const devolverFoco = useRef(false);
   const fecharPainel = () => {
+    devolverFoco.current = true;
     setPainelAberto(false);
-    // O foco volta para o botão que abre a gaveta (não cai no <body>).
-    document.getElementById('botao-painel')?.focus();
   };
 
   useEffect(() => {
     if (aberta && focarPainel.current) {
       focarPainel.current = false;
       document.getElementById('painel')?.focus({ preventScroll: true });
+    }
+    if (!aberta && devolverFoco.current) {
+      devolverFoco.current = false;
+      const alca = document.getElementById('alca-painel');
+      const visivel = alca && getComputedStyle(alca).display !== 'none';
+      (visivel ? alca : document.getElementById('botao-painel'))?.focus();
     }
   }, [aberta]);
 
@@ -99,8 +107,8 @@ export function App() {
     if (!aberta) return;
     const tecla = (ev: KeyboardEvent) => {
       if (ev.key === 'Escape' && !document.querySelector('dialog[open]')) {
-        setPainelAberto(false);
-        if (document.getElementById('painel')?.contains(document.activeElement)) document.getElementById('botao-painel')?.focus();
+        if (document.getElementById('painel')?.contains(document.activeElement)) fecharPainel();
+        else setPainelAberto(false);
       }
     };
     document.addEventListener('keydown', tecla);
@@ -108,7 +116,7 @@ export function App() {
   }, [aberta]);
 
   return (
-    <div className="app">
+    <div className={aberta ? 'app painel-aberto' : 'app'}>
       <a className="pular" href="#conteudo">
         Pular para as disciplinas
       </a>
@@ -146,13 +154,27 @@ export function App() {
         mostrarDica={emGaveta && !dicaVista && !aberta}
         onDispensarDica={dispensarDica}
       />
-      {/* Alça na borda direita (1100 a 1619 px; ver CSS): mostra que existe um painel. Para mouse; no teclado e no
-          leitor de tela o caminho é o botão da barra, por isso fica fora da ordem de foco. */}
+      {/* Aba da borda direita: em computador com mouse, de 1100 a 1619 px, é o único controle da gaveta (o botão da
+          barra some pelo CSS); fora disso ela some e vale o botão. Ao passar o mouse ou focar pelo teclado, se alarga
+          e mostra "Abrir resumo e ações"; Esc recolhe o rótulo. */}
       {emGaveta && gavetaDireita && !aberta && (
-        <button type="button" className="alca-painel" tabIndex={-1} aria-hidden="true" onClick={() => abrirPainel(true)}>
+        <button
+          type="button"
+          id="alca-painel"
+          className="alca-painel"
+          aria-label="Resumo e ações"
+          aria-expanded={false}
+          aria-controls="painel"
+          onClick={() => abrirPainel(true)}
+          onKeyDown={(ev) => {
+            if (ev.key === 'Escape') ev.currentTarget.classList.add('recolhida');
+          }}
+          onBlur={(ev) => ev.currentTarget.classList.remove('recolhida')}
+          onMouseLeave={(ev) => ev.currentTarget.classList.remove('recolhida')}
+        >
           <IconePainel />
-          <span className="alca-painel-curto">Resumo</span>
-          <span className="alca-painel-longo">Abrir resumo e ações</span>
+          <span className="alca-painel-vertical">Resumo e ações</span>
+          <span className="alca-painel-horizontal">Abrir resumo e ações</span>
         </button>
       )}
       <div className="corpo">

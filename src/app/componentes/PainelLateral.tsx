@@ -92,7 +92,7 @@ export function PainelLateral({ e, gaveta }: { e: EstadoAluno; gaveta?: Gaveta }
       </label>
       <DisciplinasExternas e={e} />
       <ArquivoRegistro e={e} />
-      <DetalheDisciplina e={e} />
+      <DetalheDisciplina e={e} emGaveta={!!gaveta} />
     </aside>
   );
 }

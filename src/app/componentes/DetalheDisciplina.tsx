@@ -48,7 +48,7 @@ function ListaRelacao({
   );
 }
 
-export function DetalheDisciplina({ e }: { e: EstadoAluno }) {
+export function DetalheDisciplina({ e, emGaveta = false }: { e: EstadoAluno; emGaveta?: boolean }) {
   const d = e.selecionada ? porCodigo.get(e.selecionada) : undefined;
   if (!d) {
     return (
@@ -66,9 +66,24 @@ export function DetalheDisciplina({ e }: { e: EstadoAluno }) {
   return (
     <section className="detalhe" aria-labelledby="titulo-detalhe">
       <h2 id="titulo-detalhe">Disciplina selecionada</h2>
-      <a className="link voltar" href="#conteudo">
-        ↑ Voltar às disciplinas
-      </a>
+      {emGaveta ? (
+        // Na gaveta a grade continua à vista; o que fica "acima" é o resumo, para onde a gaveta abriu rolada.
+        <button
+          type="button"
+          className="link voltar"
+          onClick={() => {
+            const painel = document.getElementById('painel');
+            if (painel) painel.scrollTop = 0;
+            painel?.focus({ preventScroll: true });
+          }}
+        >
+          ↑ Ver o resumo
+        </button>
+      ) : (
+        <a className="link voltar" href="#conteudo">
+          ↑ Voltar às disciplinas
+        </a>
+      )}
       <p className="detalhe-nome">
         <strong>{d.codigo}</strong> — {d.nome}
       </p>

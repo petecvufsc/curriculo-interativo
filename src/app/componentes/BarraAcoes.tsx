@@ -1,5 +1,6 @@
 import type { EstadoAluno } from '../estado/useEstadoAluno';
 import { formatarPercentual } from '../estado/formato';
+import { SetasFases } from './SetasFases';
 
 /** Ícone de painel lateral (decorativo). */
 export function IconePainel() {
@@ -25,17 +26,21 @@ interface Props {
 /**
  * Barra de ações rápidas, em telas abaixo de 1620 px (ver CSS), onde o painel vira gaveta. Do notebook ao tablet
  * (768 px ou mais) fica fixa no topo; no celular, fixa embaixo. O botão (verde, com ícone) abre e fecha a gaveta.
+ * Em computador com mouse, de 1100 a 1619 px, o botão some (CSS) e quem abre a gaveta é a aba da borda direita:
+ * um controle só por aparelho, para ninguém ver ou ouvir dois botões que fazem a mesma coisa.
  */
 export function BarraAcoes({ e, painelAberto, onAlternarPainel, avisarDetalhe, mostrarDica, onDispensarDica }: Props) {
   const pct = e.progresso.geral.percentual;
   const rotulo = avisarDetalhe && e.selecionada ? 'Ver detalhe da disciplina' : 'Resumo e ações';
   return (
     <nav className="barra-acoes" aria-label="Ações rápidas">
-      {e.aba === 'grade' && (
+      {/* Com a gaveta aberta o "Simular" dela basta: dois botões iguais lado a lado confundem */}
+      {e.aba === 'grade' && !painelAberto && (
         <button type="button" className="botao primario" onClick={() => e.dispatch({ tipo: 'simular' })}>
           Simular
         </button>
       )}
+      {e.aba === 'grade' && painelAberto && <SetasFases />}
       {pct !== null && (
         <span className="barra-resumo">
           {formatarPercentual(pct)}%<span className="barra-resumo-longo"> integralizado</span>

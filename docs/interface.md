@@ -64,18 +64,18 @@ A página nunca tem rolagem horizontal.
 | Largura | Layout |
 |---|---|
 | ≥ 1620 px | 10 colunas e painel lateral de 290 px, fixo (sticky) à direita. |
-| 1100–1619 px | Até 10 colunas (mínimo de 125 px cada; margem direita de 31 px reservada para a alça, e as 10 colunas ainda cabem em 1366 px). Painel em **gaveta à direita** (400 px), aberta pelo botão da barra fixa no topo ou pela **alça verde** na borda direita. |
-| 768–1099 px | Fases em grade que quebra linha, em ordem; barra no topo; gaveta que **sobe de baixo** (até 55% da altura) e a página rola para a disciplina clicada ficar acima dela. Sem alça. |
+| 1100–1619 px | Até 10 colunas (mínimo de 125 px cada; margem direita de 31 px reservada para a aba, e as 10 colunas ainda cabem em 1366 px). Painel em **gaveta à direita** (340 px). Com a gaveta aberta, a página reserva 352 px à direita (nada fica coberto) e, de 1362 px para cima, a grade mantém as 10 colunas e **rola na horizontal** dentro do próprio espaço. |
+| 768–1099 px | Fases em grade que quebra linha, em ordem; barra no topo; gaveta que **sobe de baixo** (até 55% da altura) e a página rola para a disciplina clicada ficar acima dela. Sem aba. |
 | < 768 px | Fases empilhadas, margem de 16 px; barra fixa **embaixo** e painel em gaveta que **sobe de baixo** (até 85% da altura). |
 
-**Gaveta do painel (< 1620 px).** Antes o painel caía para depois da grade inteira e, em notebooks (1366–1536 px), ficava escondido. Agora:
-- O botão **"Resumo e ações"** fica sempre à vista na barra de ações, nas duas abas, com `aria-expanded`. É verde contornado e tem ícone de painel, para não sumir no branco da barra. O rótulo não muda (no celular, com uma disciplina escolhida, vira "Ver detalhe da disciplina"). Abrir por ele leva o foco para a gaveta.
-- **Alça** (1100–1619 px): aba verde de 28 px presa à borda direita, com ícone e "Resumo" na vertical. Ao passar o mouse, se alarga e mostra "Abrir resumo e ações"; o clique abre a gaveta. É só para o mouse (`aria-hidden`, fora do Tab): no teclado e no leitor de tela o caminho é o botão da barra.
-- **Dica de primeira visita:** um balão ligado ao botão ("Seu resumo, Exportar, Importar e o detalhe das disciplinas ficam em Resumo e ações"), com "Entendi". Some de vez (guardado no navegador) ao clicar em "Entendi" ou quando a gaveta abre pela primeira vez.
+**Gaveta do painel (< 1620 px).** Antes o painel caía para depois da grade inteira e, em notebooks (1366–1536 px), ficava escondido. Revisões: [relatorio-ux-gaveta.md](relatorio-ux-gaveta.md) e [relatorio-ux-gaveta-2.md](relatorio-ux-gaveta-2.md). Agora:
+- **Um controle por aparelho.** Em computador com mouse (`hover: hover` e `pointer: fine`), de 1100 a 1619 px, quem abre a gaveta é a **aba verde da borda direita** (28 × 140 px, ícone e "Resumo e ações" na vertical); o botão da barra some. Ao passar o mouse **ou focar pelo teclado**, a aba se alarga (190 px) e mostra "Abrir resumo e ações"; Esc recolhe o rótulo. É um botão de verdade (`aria-expanded`, `aria-controls`), na ordem de Tab logo após a barra. Em telas de toque (inclusive tablets grandes) e abaixo de 1100 px, a aba some e vale o botão verde **"Resumo e ações"** da barra (contornado, com ícone; no celular, com uma disciplina escolhida, vira "Ver detalhe da disciplina").
+- **Dica de primeira visita:** um balão ligado ao controle visível ("Seu resumo, Exportar, Importar e o detalhe das disciplinas ficam em Resumo e ações"), com "Entendi". Some de vez (guardado no navegador) ao clicar em "Entendi" ou quando a gaveta abre pela primeira vez.
+- **Gaveta aberta em notebook:** a página, o cabeçalho e a barra reservam a largura da gaveta, então nada fica por baixo dela (inclusive o "Desfazer" do aviso de ação). A grade rola na horizontal (1362–1619 px); na barra, **setas** ◀ ▶ (44 px) rolam três fases por vez e dizem "Fases 4 a 10 de 10"; as bordas da grade esmaecem do lado em que há mais fases; o Tab até uma disciplina meio escondida a traz inteira à vista. A roda horizontal do mouse e Shift+roda também rolam. Enquanto a gaveta está aberta, o "Simular" da barra dá lugar às setas (o da gaveta basta).
 - No celular a barra mostra a porcentagem curta ("12%").
-- Em notebook e tablet (≥ 768 px), **clicar no nome de uma disciplina abre a gaveta já no detalhe dela**, sem tirar o foco da grade. No celular, não abre sozinha (cobriria a grade).
-- A gaveta **não é modal**: cobre só a faixa da direita, para os destaques de pré-requisito continuarem visíveis, e a grade segue clicável (escolher outra disciplina atualiza o detalhe).
-- Fecha com **Fechar**, com **Esc** (com o foco na gaveta ou na grade) ou pelo mesmo botão; o foco volta ao botão. Fechada, fica fora da tela e do teclado (`inert`).
+- Em notebook e tablet (≥ 768 px), **clicar no nome de uma disciplina abre a gaveta já no detalhe dela**, sem tirar o foco da grade. No celular, não abre sozinha (cobriria a grade). No detalhe, "↑ Ver o resumo" leva ao topo da gaveta.
+- A gaveta **não é modal**: a grade segue clicável (escolher outra disciplina atualiza o detalhe).
+- Fecha com **Fechar**, com **Esc** (com o foco na gaveta ou na grade) ou pelo botão da barra; o foco volta ao controle visível (aba ou botão). Fechada, fica fora da tela e do teclado (`inert`).
 - O atalho "Pular para o resumo e as ações" abre a gaveta.
 - Os pontos de corte ficam em `src/app/estado/useMidia.ts` e precisam bater com `base.css` e `painel.css`.
 

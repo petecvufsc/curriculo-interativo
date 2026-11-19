@@ -95,7 +95,7 @@
 }
 @media (min-width: 1100px) {
   .painel.gaveta.aberta {
-    left: auto; top: 0; bottom: 0; width: min(400px, 92vw); max-height: none; border-radius: 0;
+    left: auto; top: 0; bottom: 0; width: min(340px, 92vw); max-height: none; border-radius: 0;
     border-width: 0 0 0 1px; animation-name: gaveta-entra;
   }
 }

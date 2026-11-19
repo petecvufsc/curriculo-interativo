@@ -195,27 +195,69 @@ input[type='checkbox']:indeterminate::after { content: ''; width: 10px; height: 
   .dica-painel::before { top: auto; bottom: -9px; transform: rotate(225deg); }
 }
 
-/* Alça na borda direita (1100 a 1619 px): mostra que há um painel; ao passar o mouse, se alarga e diz o que faz */
+/* Barra em linha flexível: Simular (ou as setas das fases), porcentagem e, à direita, o botão do painel */
+.barra-acoes { display: flex; align-items: center; gap: 8px; }
+.barra-acoes-detalhes { margin-left: auto; }
+@media (max-width: 767.98px) { .barra-acoes-detalhes { flex: 1 1 auto; justify-content: center; } }
+@media (min-width: 1620px) { .barra-acoes { display: none; } }
+
+/* Setas das fases (gaveta aberta e grade rolando na horizontal; ver SetasFases.tsx) */
+.setas-fases { display: flex; align-items: center; gap: 6px; }
+.seta-fases { min-width: 44px; min-height: 44px; padding: 0; font-size: 0.875rem; }
+.setas-fases-texto { font-size: 0.875rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/*
+ * Aba na borda direita. Em computador com mouse, de 1100 a 1619 px, é o único controle da gaveta e o botão da barra
+ * some; em telas de toque (inclusive tablets grandes) ela some e fica o botão. Um controle por aparelho.
+ */
 .alca-painel { display: none; }
 @media (min-width: 1100px) and (max-width: 1619.98px) {
-  /* Espaço para a alça sem tirar a 10ª coluna em 1366 px: 1304 px de grade + 12 + 31 = 1347 px */
+  /* Espaço para a aba sem tirar a 10ª coluna em 1366 px: 1304 px de grade + 12 + 31 = 1347 px */
   .corpo { padding-right: 31px; }
+}
+@media (min-width: 1100px) and (max-width: 1619.98px) and (hover: hover) and (pointer: fine) {
+  #botao-painel { display: none; }
   .alca-painel {
     position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 9;
-    display: flex; flex-direction: column; align-items: center; gap: 8px; width: 28px; padding: 12px 0;
-    cursor: pointer; font: inherit; font-size: 0.875rem; font-weight: 700;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    width: 28px; min-height: 140px; padding: 10px 0;
+    cursor: pointer; font: inherit; font-size: 0.875rem; font-weight: 700; white-space: nowrap;
     color: var(--primario-tx); background: var(--primario-bg); border: 0; border-radius: 6px 0 0 6px;
-    box-shadow: -2px 2px 8px rgb(0 0 0 / 0.2); transition: width 0.15s ease-out;
+    box-shadow: -2px 2px 8px rgb(0 0 0 / 0.2);
   }
   .alca-painel .icone-painel { width: 18px; height: 18px; }
-  .alca-painel-curto { writing-mode: vertical-rl; transform: rotate(180deg); }
-  .alca-painel-longo {
-    position: absolute; right: calc(100% + 6px); top: 50%; transform: translateY(-50%); white-space: nowrap;
-    padding: 6px 10px; border-radius: 4px; background: var(--primario-bg); color: var(--primario-tx);
-    opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  .alca-painel-vertical { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .alca-painel-horizontal { display: none; }
+  /* Ao passar o mouse ou focar pelo teclado, a aba se alarga e diz o que faz (Esc recolhe o rótulo: WCAG 1.4.13) */
+  .alca-painel:is(:hover, :focus-visible):not(.recolhida) {
+    flex-direction: row; width: 190px; min-height: 48px; padding: 0 14px; background: var(--primario-bg-hover);
   }
-  .alca-painel:hover { width: 36px; background: var(--primario-bg-hover); }
-  .alca-painel:hover .alca-painel-longo { opacity: 1; }
+  .alca-painel:is(:hover, :focus-visible):not(.recolhida) .alca-painel-vertical { display: none; }
+  .alca-painel:is(:hover, :focus-visible):not(.recolhida) .alca-painel-horizontal { display: inline; }
+  .alca-painel:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+  /* A dica de primeira visita aponta para a aba, não para o botão escondido */
+  .dica-painel { position: fixed; top: 50%; right: 40px; transform: translateY(-50%); }
+  .dica-painel::before { top: 50%; right: -9px; transform: translateY(-50%) rotate(135deg); }
+}
+
+/*
+ * Gaveta aberta de 1100 a 1619 px: a página reserva a largura dela à direita, para nada ficar coberto (inclusive o
+ * "Desfazer" do aviso de ação). De 1362 px para cima, a grade mantém as 10 colunas de 125 px e rola na horizontal
+ * dentro do próprio espaço (a página nunca rola na horizontal); abaixo disso ela só quebra em mais linhas.
+ */
+@media (min-width: 1100px) and (max-width: 1619.98px) {
+  .app.painel-aberto .corpo { padding-right: 352px; }
+  /* Cabeçalho (Ajuda, Sobre) e barra também abrem espaço: em tela de toque o botão da barra continua à vista */
+  .app.painel-aberto .topo, .app.painel-aberto .barra-acoes { padding-right: 364px; }
+}
+@media (min-width: 1362px) and (max-width: 1619.98px) {
+  .app.painel-aberto .fases {
+    grid-template-columns: repeat(10, 125px); overflow-x: auto; overscroll-behavior-x: contain;
+    padding: 2px 2px 12px; margin: -2px;
+  }
+  .fases.rola-dir { mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); }
+  .fases.rola-esq { mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent); }
+  .fases.rola-esq.rola-dir { mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent); }
 }
 /* O botão do painel fica sempre na última coluna, mesmo sem "Simular" (aba Planejamento) */
 .barra-acoes-detalhes { grid-column: -2 / -1; justify-content: center; }
